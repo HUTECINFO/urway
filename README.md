@@ -1,36 +1,58 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# UR WAY by HUTEC
 
-## Getting Started
+Plataforma editorial-tecnológica de oportunidades de viaje para México.
 
-First, run the development server:
+## Desarrollo local
+
+Requisitos: Node.js 20.9 o superior y npm.
 
 ```bash
+npm install
+touch .env.local
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Abre [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+La aplicación funciona sin servicios externos en modo demo. El acceso editorial está disponible en `/login` con:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```text
+admin@urway.mx
+urway-demo
+```
 
-## Learn More
+Define `DEMO_ADMIN_EMAIL` y `DEMO_ADMIN_PASSWORD` para cambiar estas credenciales locales.
 
-To learn more about Next.js, take a look at the following resources:
+## Supabase
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Configura las variables de Supabase en `.env.local` y aplica la migration y el seed:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+supabase db reset
+```
 
-## Deploy on Vercel
+Después de crear el usuario administrador en Supabase Auth, asigna el rol desde SQL:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```sql
+update public.users set role = 'ADMIN' where email = 'tu-correo@dominio.com';
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+La aplicación cambia automáticamente del repositorio demo a Supabase cuando existen `NEXT_PUBLIC_SUPABASE_URL` y `NEXT_PUBLIC_SUPABASE_ANON_KEY`. Las operaciones de tracking y cron requieren `SUPABASE_SERVICE_ROLE_KEY` en el servidor.
+
+## Verificación
+
+```bash
+npm run lint
+npm run typecheck
+npm run build
+```
+
+## Integraciones
+
+- `SERPAPI_KEY`: activa el adapter de SerpApi en discovery.
+- `CRON_SECRET`: protege los endpoints `/api/cron/*` en producción.
+- `NEXT_PUBLIC_POSTHOG_KEY`: habilita la estructura de eventos.
+- `RESEND_API_KEY`: habilita el cliente transaccional preparado.
+- Firebase Cloud Messaging queda desacoplado mediante la interfaz `PushProvider`.
+
+Los cron jobs de Vercel están definidos en `vercel.json`.

@@ -44,7 +44,7 @@ export function createDealFingerprint(deal: FingerprintableDeal): string {
   ]
     .map((part) => String(part).trim().toUpperCase().replace(/\s+/g, " "))
     .join("|");
-  return `deal_${hash(identity)}`;
+  return `deal_${hash(identity)}${hash(`urway:${identity}`)}`;
 }
 
 export const fingerprintDeal = createDealFingerprint;

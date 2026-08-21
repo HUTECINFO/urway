@@ -86,6 +86,19 @@ const secureBookingUrl = (value: string | undefined): string => {
   return "https://www.google.com/travel/flights";
 };
 
+const providerReferenceFor = (
+  offer: SerpFlightOffer,
+  origin: Airport,
+  destination: Airport,
+  departureDate: string,
+  index: number,
+): string => {
+  const token = [offer.booking_token, offer.departure_token]
+    .map((value) => value?.trim())
+    .find((value) => value && value.length >= 2 && value.length <= 255);
+  return token ?? `serpapi:${origin.code}:${destination.code}:${departureDate.slice(0, 10)}:${index}`;
+};
+
 export class SerpApiProvider implements FlightDealProvider {
   readonly id = "serpapi";
   readonly name = "SerpAPI Google Flights";
@@ -173,7 +186,7 @@ export class SerpApiProvider implements FlightDealProvider {
       );
       return [{
         provider: this.id,
-        providerDealId: offer.booking_token ?? offer.departure_token ?? `${origin.code}-${destination.code}-${index}`,
+        providerDealId: providerReferenceFor(offer, origin, destination, params.departureDateFrom, index),
         origin,
         destination,
         departureDate: asIsoDate(firstLeg.departure_airport?.time, params.departureDateFrom),

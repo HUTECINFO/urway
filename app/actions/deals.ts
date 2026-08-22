@@ -43,7 +43,7 @@ const transitionSchema = z.object({
   id: idSchema,
   nextStatus: z.enum(DealStatus, { error: "Estado inválido." }),
   rejectionReason: z.preprocess(
-    (value) => typeof value === "string" ? value.trim() : undefined,
+    (value) => typeof value === "string" && value.trim() ? value.trim() : undefined,
     z.string().min(3, "Indica un motivo de al menos 3 caracteres.").max(1000, "El motivo es demasiado largo.").optional(),
   ),
 }).strict().superRefine((value, context) => {

@@ -33,7 +33,6 @@ interface SerpApiResponse {
   error?: string;
   best_flights?: SerpFlightOffer[];
   other_flights?: SerpFlightOffer[];
-  search_metadata?: { google_flights_url?: string };
 }
 
 export interface SerpApiProviderOptions {
@@ -74,16 +73,20 @@ const asIsoDate = (value: string | undefined, fallback: string): string => {
   return candidate.toISOString();
 };
 
-const secureBookingUrl = (value: string | undefined): string => {
-  if (value) {
-    try {
-      const url = new URL(value);
-      if (url.protocol === "https:") return url.toString();
-    } catch {
-      return "https://www.google.com/travel/flights";
-    }
-  }
-  return "https://www.google.com/travel/flights";
+const bookingUrlFor = (
+  origin: Airport,
+  destination: Airport,
+  departureDate: string,
+  returnDate: string | undefined,
+  currency: string,
+): string => {
+  const url = new URL("https://www.google.com/travel/flights");
+  const query = `Flights from ${origin.code} to ${destination.code} on ${departureDate.slice(0, 10)}`;
+  url.searchParams.set("q", returnDate ? `${query} through ${returnDate.slice(0, 10)}` : `${query} one way`);
+  url.searchParams.set("hl", "es");
+  url.searchParams.set("gl", "mx");
+  url.searchParams.set("curr", currency);
+  return url.toString();
 };
 
 const providerReferenceFor = (
@@ -169,7 +172,6 @@ export class SerpApiProvider implements FlightDealProvider {
     const data = (await response.json()) as SerpApiResponse;
     if (data.error) throw new ProviderRequestError(this.id, `SerpAPI error: ${data.error}`);
     const offers = [...(data.best_flights ?? []), ...(data.other_flights ?? [])];
-    const bookingUrl = secureBookingUrl(data.search_metadata?.google_flights_url);
     const currency = params.currency?.trim().toUpperCase() || "MXN";
     const normalized = offers.flatMap((offer, index): NormalizedFlightDeal[] => {
       const legs = offer.flights ?? [];
@@ -184,16 +186,18 @@ export class SerpApiProvider implements FlightDealProvider {
         lastLeg.arrival_airport?.id,
         lastLeg.arrival_airport?.name,
       );
+      const departureDate = asIsoDate(firstLeg.departure_airport?.time, params.departureDateFrom);
+      const returnDate =
+        params.tripType === TripType.ONE_WAY
+          ? undefined
+          : asIsoDate(undefined, params.returnDateFrom ?? params.returnDateTo ?? params.departureDateTo);
       return [{
         provider: this.id,
-        providerDealId: providerReferenceFor(offer, origin, destination, params.departureDateFrom, index),
+        providerDealId: providerReferenceFor(offer, origin, destination, departureDate, index),
         origin,
         destination,
-        departureDate: asIsoDate(firstLeg.departure_airport?.time, params.departureDateFrom),
-        returnDate:
-          params.tripType === TripType.ONE_WAY
-            ? undefined
-            : asIsoDate(undefined, params.returnDateFrom ?? params.returnDateTo ?? params.departureDateTo),
+        departureDate,
+        returnDate,
         tripType: params.tripType,
         price: offer.price as number,
         currency,
@@ -204,7 +208,7 @@ export class SerpApiProvider implements FlightDealProvider {
           offer.total_duration ?? legs.reduce((sum, leg) => sum + (leg.duration ?? 0), 0),
         overnight: legs.some((leg) => leg.overnight),
         cabinClass: params.cabinClass ?? "economy",
-        bookingUrl,
+        bookingUrl: bookingUrlFor(origin, destination, departureDate, returnDate, currency),
         metadata: { offerType: offer.type, airplane: firstLeg.airplane },
       }];
     });

@@ -42,7 +42,15 @@ const editorSchema = z.object({
 const transitionSchema = z.object({
   id: idSchema,
   nextStatus: z.enum(DealStatus, { error: "Estado inválido." }),
-}).strict();
+  rejectionReason: z.preprocess(
+    (value) => typeof value === "string" ? value.trim() : undefined,
+    z.string().min(3, "Indica un motivo de al menos 3 caracteres.").max(1000, "El motivo es demasiado largo.").optional(),
+  ),
+}).strict().superRefine((value, context) => {
+  if (value.nextStatus === DealStatus.REJECTED && !value.rejectionReason) {
+    context.addIssue({ code: "custom", path: ["rejectionReason"], message: "Indica el motivo del rechazo." });
+  }
+});
 
 const reverifySchema = z.object({ id: idSchema }).strict();
 
@@ -98,13 +106,21 @@ export async function transitionAdminDealAction(
   formData: FormData,
 ): Promise<AdminDealActionState> {
   await requireAdmin();
-  const parsed = transitionSchema.safeParse({ id: formData.get("id"), nextStatus: formData.get("nextStatus") });
+  const parsed = transitionSchema.safeParse({
+    id: formData.get("id"),
+    nextStatus: formData.get("nextStatus"),
+    rejectionReason: formData.get("rejectionReason"),
+  });
   if (!parsed.success) return { status: "error", message: "La acción solicitada no es válida.", errors: formErrors(parsed.error) };
 
   try {
     const current = await getDealById(parsed.data.id, true);
     if (!current) return { status: "error", message: "El Drop ya no está disponible." };
-    const updated = await transitionDeal(parsed.data.id, parsed.data.nextStatus);
+    const updated = await transitionDeal(
+      parsed.data.id,
+      parsed.data.nextStatus,
+      parsed.data.rejectionReason,
+    );
     refreshDealPaths(updated.id, updated.slug);
     return { status: "success", message: `Estado actualizado a ${updated.status.toLowerCase()}.` };
   } catch (error) {

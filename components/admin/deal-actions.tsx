@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState } from "react";
+import { useActionState, useRef, type FormEvent } from "react";
 import { Check, Clock3, Eye, LoaderCircle, RefreshCw, Send, X } from "lucide-react";
 import { reverifyAdminDealAction, transitionAdminDealAction, type AdminDealActionState } from "@/app/actions/deals";
 import { DealStatus } from "@/lib/domain/types";
@@ -23,11 +23,23 @@ const transitionConfig: Partial<Record<DealStatus, Array<{ label: string; next: 
 
 function TransitionButton({ id, label, next, icon: Icon, style }: { id: string; label: string; next: DealStatus; icon: typeof Check; style: string }) {
   const [state, action, pending] = useActionState(transitionAdminDealAction, initialState);
+  const rejectionReasonRef = useRef<HTMLInputElement>(null);
+
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    if (next !== DealStatus.REJECTED) return;
+    const reason = window.prompt("Indica el motivo del rechazo:");
+    if (!reason?.trim()) {
+      event.preventDefault();
+      return;
+    }
+    if (rejectionReasonRef.current) rejectionReasonRef.current.value = reason.trim();
+  };
 
   return (
-    <form action={action} className="relative">
+    <form action={action} className="relative" onSubmit={handleSubmit}>
       <input type="hidden" name="id" value={id} />
       <input type="hidden" name="nextStatus" value={next} />
+      <input ref={rejectionReasonRef} type="hidden" name="rejectionReason" />
       <button type="submit" disabled={pending} title={state.message} className={`inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border px-3 text-xs font-bold transition disabled:cursor-wait disabled:opacity-60 ${style}`}>
         {pending ? <LoaderCircle className="animate-spin" size={14} /> : <Icon size={14} />}{label}
       </button>

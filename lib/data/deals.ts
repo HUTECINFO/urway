@@ -320,11 +320,18 @@ const allowedTransitions: Record<DealStatus, readonly DealStatus[]> = {
   [DealStatus.REJECTED]: [],
 };
 
-export async function transitionDeal(id: string, nextStatus: DealStatus): Promise<Deal> {
+export async function transitionDeal(
+  id: string,
+  nextStatus: DealStatus,
+  rejectionReason?: string,
+): Promise<Deal> {
   const current = await getDealById(id, true);
   if (!current) throw new Error("Drop no encontrado");
   if (!allowedTransitions[current.status].includes(nextStatus)) {
     throw new Error(`Transición no permitida: ${current.status} → ${nextStatus}`);
+  }
+  if (nextStatus === DealStatus.REJECTED && !rejectionReason?.trim()) {
+    throw new Error("Indica el motivo del rechazo.");
   }
 
   const now = new Date().toISOString();
@@ -345,6 +352,7 @@ export async function transitionDeal(id: string, nextStatus: DealStatus): Promis
   const patch: Record<string, string> = { status: nextStatus, verified_at: now };
   if (nextStatus === DealStatus.PUBLISHED) patch.published_at = now;
   if (nextStatus === DealStatus.EXPIRED) patch.expires_at = now;
+  if (nextStatus === DealStatus.REJECTED) patch.rejection_reason = rejectionReason!.trim();
   const { data, error } = await client.from("deals").update(patch).eq("id", id).select(dealSelection).single();
   if (error) throw new Error(`No se pudo cambiar el estado: ${error.message}`);
   return mapDbDeal(data as unknown as DbDealRow);

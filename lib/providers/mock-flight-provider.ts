@@ -1,5 +1,6 @@
 import { getAirport } from "../demo/airports";
 import { TripType } from "../domain/types";
+import { getCountryImageUrl } from "../media/country-images";
 import type {
   DealSearchParams,
   FlightDealProvider,
@@ -20,20 +21,20 @@ interface MockDealTemplate {
 }
 
 const TEMPLATES: readonly MockDealTemplate[] = [
-  { destination: "NRT", airline: "Aeroméxico", flightNumber: "AM58", price: 10890, originalPrice: 18990, stops: 0, durationMinutes: 870, departureHour: 23, tripLengthDays: 10, imageUrl: "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?auto=format&fit=crop&w=1600&q=80" },
-  { destination: "MAD", airline: "Iberia", flightNumber: "IB304", price: 9490, originalPrice: 16990, stops: 0, durationMinutes: 660, departureHour: 20, tripLengthDays: 9, imageUrl: "https://images.unsplash.com/photo-1539037116277-4db20889f2d4?auto=format&fit=crop&w=1600&q=80" },
-  { destination: "MAD", airline: "Aeroméxico", flightNumber: "AM34", price: 11990, originalPrice: 19490, stops: 1, durationMinutes: 845, departureHour: 18, tripLengthDays: 8, imageUrl: "https://images.unsplash.com/photo-1543783207-ec64e4d95325?auto=format&fit=crop&w=1600&q=80" },
-  { destination: "JFK", airline: "Viva", flightNumber: "VB100", price: 4190, originalPrice: 7790, stops: 0, durationMinutes: 305, departureHour: 7, tripLengthDays: 5, imageUrl: "https://images.unsplash.com/photo-1485871981521-5b1fd3805eee?auto=format&fit=crop&w=1600&q=80" },
-  { destination: "CDG", airline: "Air France", flightNumber: "AF179", price: 10990, originalPrice: 19990, stops: 1, durationMinutes: 850, departureHour: 19, tripLengthDays: 9, imageUrl: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=1600&q=80" },
-  { destination: "YVR", airline: "Air Canada", flightNumber: "AC996", price: 5490, originalPrice: 9490, stops: 0, durationMinutes: 300, departureHour: 8, tripLengthDays: 6, imageUrl: "https://images.unsplash.com/photo-1559511260-66a654ae982a?auto=format&fit=crop&w=1600&q=80" },
-  { destination: "LIM", airline: "LATAM", flightNumber: "LA2473", price: 6990, originalPrice: 11990, stops: 0, durationMinutes: 355, departureHour: 16, tripLengthDays: 7, imageUrl: "https://images.unsplash.com/photo-1531968455001-5c5272a41129?auto=format&fit=crop&w=1600&q=80" },
-  { destination: "BOG", airline: "Volaris", flightNumber: "Y43912", price: 4590, originalPrice: 8290, stops: 0, durationMinutes: 275, departureHour: 10, tripLengthDays: 5, imageUrl: "https://images.unsplash.com/photo-1536086845797-31a1e17fc7db?auto=format&fit=crop&w=1600&q=80" },
-  { destination: "EZE", airline: "Copa Airlines", flightNumber: "CM195", price: 12490, originalPrice: 20990, stops: 1, durationMinutes: 825, departureHour: 6, tripLengthDays: 10, imageUrl: "https://images.unsplash.com/photo-1589909202802-8f4aadce1849?auto=format&fit=crop&w=1600&q=80" },
-  { destination: "LAX", airline: "Volaris", flightNumber: "Y41710", price: 3290, originalPrice: 6190, stops: 0, durationMinutes: 205, departureHour: 9, tripLengthDays: 4, imageUrl: "https://images.unsplash.com/photo-1534190760961-74e8c1c5c3da?auto=format&fit=crop&w=1600&q=80" },
-  { destination: "LAS", airline: "Viva", flightNumber: "VB602", price: 2990, originalPrice: 5790, stops: 0, durationMinutes: 190, departureHour: 13, tripLengthDays: 3, imageUrl: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1600&q=80" },
-  { destination: "FCO", airline: "Aeroméxico", flightNumber: "AM70", price: 12990, originalPrice: 22490, stops: 1, durationMinutes: 900, departureHour: 21, tripLengthDays: 10, imageUrl: "https://images.unsplash.com/photo-1552832230-c0197dd311b5?auto=format&fit=crop&w=1600&q=80" },
-  { destination: "SJO", airline: "Volaris", flightNumber: "Y43120", price: 3890, originalPrice: 6990, stops: 0, durationMinutes: 180, departureHour: 11, tripLengthDays: 5, imageUrl: "https://images.unsplash.com/photo-1518259102261-b40117eabbc9?auto=format&fit=crop&w=1600&q=80" },
-  { destination: "HAV", airline: "Viva", flightNumber: "VB312", price: 3490, originalPrice: 6490, stops: 0, durationMinutes: 170, departureHour: 14, tripLengthDays: 5, imageUrl: "https://images.unsplash.com/photo-1500759285222-a95626b934cb?auto=format&fit=crop&w=1600&q=80" },
+  { destination: "NRT", airline: "Aeroméxico", flightNumber: "AM58", price: 10890, originalPrice: 18990, stops: 0, durationMinutes: 870, departureHour: 23, tripLengthDays: 10, imageUrl: getCountryImageUrl("JP") },
+  { destination: "MAD", airline: "Iberia", flightNumber: "IB304", price: 9490, originalPrice: 16990, stops: 0, durationMinutes: 660, departureHour: 20, tripLengthDays: 9, imageUrl: getCountryImageUrl("ES") },
+  { destination: "MAD", airline: "Aeroméxico", flightNumber: "AM34", price: 11990, originalPrice: 19490, stops: 1, durationMinutes: 845, departureHour: 18, tripLengthDays: 8, imageUrl: getCountryImageUrl("ES") },
+  { destination: "JFK", airline: "Viva", flightNumber: "VB100", price: 4190, originalPrice: 7790, stops: 0, durationMinutes: 305, departureHour: 7, tripLengthDays: 5, imageUrl: getCountryImageUrl("US") },
+  { destination: "CDG", airline: "Air France", flightNumber: "AF179", price: 10990, originalPrice: 19990, stops: 1, durationMinutes: 850, departureHour: 19, tripLengthDays: 9, imageUrl: getCountryImageUrl("FR") },
+  { destination: "YVR", airline: "Air Canada", flightNumber: "AC996", price: 5490, originalPrice: 9490, stops: 0, durationMinutes: 300, departureHour: 8, tripLengthDays: 6, imageUrl: getCountryImageUrl("CA") },
+  { destination: "LIM", airline: "LATAM", flightNumber: "LA2473", price: 6990, originalPrice: 11990, stops: 0, durationMinutes: 355, departureHour: 16, tripLengthDays: 7, imageUrl: getCountryImageUrl("PE") },
+  { destination: "BOG", airline: "Volaris", flightNumber: "Y43912", price: 4590, originalPrice: 8290, stops: 0, durationMinutes: 275, departureHour: 10, tripLengthDays: 5, imageUrl: getCountryImageUrl("CO") },
+  { destination: "EZE", airline: "Copa Airlines", flightNumber: "CM195", price: 12490, originalPrice: 20990, stops: 1, durationMinutes: 825, departureHour: 6, tripLengthDays: 10, imageUrl: getCountryImageUrl("AR") },
+  { destination: "LAX", airline: "Volaris", flightNumber: "Y41710", price: 3290, originalPrice: 6190, stops: 0, durationMinutes: 205, departureHour: 9, tripLengthDays: 4, imageUrl: getCountryImageUrl("US") },
+  { destination: "LAS", airline: "Viva", flightNumber: "VB602", price: 2990, originalPrice: 5790, stops: 0, durationMinutes: 190, departureHour: 13, tripLengthDays: 3, imageUrl: getCountryImageUrl("US") },
+  { destination: "FCO", airline: "Aeroméxico", flightNumber: "AM70", price: 12990, originalPrice: 22490, stops: 1, durationMinutes: 900, departureHour: 21, tripLengthDays: 10, imageUrl: getCountryImageUrl("IT") },
+  { destination: "SJO", airline: "Volaris", flightNumber: "Y43120", price: 3890, originalPrice: 6990, stops: 0, durationMinutes: 180, departureHour: 11, tripLengthDays: 5, imageUrl: getCountryImageUrl("CR") },
+  { destination: "HAV", airline: "Viva", flightNumber: "VB312", price: 3490, originalPrice: 6490, stops: 0, durationMinutes: 170, departureHour: 14, tripLengthDays: 5, imageUrl: getCountryImageUrl("CU") },
 ];
 
 export interface MockFlightProviderOptions {

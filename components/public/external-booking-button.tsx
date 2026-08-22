@@ -23,7 +23,7 @@ export function ExternalBookingButton({ dealId, placement = "detail", className,
       )}
       aria-label="Ver esta tarifa con el proveedor en una nueva pestaña"
     >
-      Ver oferta
+      Ver tarifa
       <ArrowUpRight aria-hidden="true" className={compact ? "size-3.5" : "size-4"} />
     </Link>
   );

@@ -3,6 +3,7 @@ import "server-only";
 import { getAirport } from "@/lib/demo/airports";
 import { DealStatus, DealType, TripType, type Airport, type Deal } from "@/lib/domain/types";
 import { getScoreLabel } from "@/lib/domain/scoring";
+import { getCountryImageUrl } from "@/lib/media/country-images";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
@@ -178,7 +179,7 @@ function mapDbDeal(row: DbDealRow): Deal {
     stops: row.stops,
     airline: row.airline ?? "Por confirmar",
     baggage: row.baggage ?? "Consulta las condiciones del proveedor.",
-    imageUrl: row.image_url ?? "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?auto=format&fit=crop&w=1600&q=80",
+    imageUrl: row.image_url ?? getCountryImageUrl(destination.countryCode),
     dealType: row.deal_type,
     status: row.status,
     score: {

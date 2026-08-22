@@ -20,7 +20,7 @@ export function PriceBlock({
 }: PriceBlockProps) {
   return (
     <div>
-      <p className={clsx("text-xs font-semibold uppercase tracking-[0.12em]", inverse ? "text-white/65" : "text-slate")}>Desde, viaje redondo</p>
+      <p className={clsx("text-xs font-semibold uppercase tracking-[0.12em]", inverse ? "text-white/65" : "text-slate")}>Desde · viaje redondo</p>
       <div className="mt-1 flex flex-wrap items-baseline gap-x-2 gap-y-1">
         <strong className={clsx("font-display font-extrabold tracking-[-0.055em]", large ? "text-4xl sm:text-5xl" : "text-3xl", inverse ? "text-white" : "text-midnight")}>
           {formatMoney(price, currency)}

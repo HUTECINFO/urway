@@ -27,7 +27,7 @@ export async function generateMetadata({ params }: DropPageProps): Promise<Metad
   const { slug } = await params;
   const deal = await getDealBySlug(slug);
   if (!deal) {
-    return { title: "Drop no encontrado", robots: { index: false, follow: false } };
+    return { title: "Ruta no encontrada", robots: { index: false, follow: false } };
   }
 
   const title = `${deal.destination.city} desde ${formatMoney(deal.price, deal.currency)}`;
@@ -84,12 +84,12 @@ export default async function DropPage({ params }: DropPageProps) {
       <PublicHeader />
       <main>
         <DealViewTracker dealId={deal.id} />
-        <section className="bg-sand pb-10 pt-6 sm:pb-16 sm:pt-10">
+        <section className="bg-sand pb-14 pt-28 sm:pb-20 sm:pt-32">
           <div className="container-page">
-            <Link href="/#drops" className="mb-6 inline-flex items-center gap-2 text-sm font-bold text-slate transition hover:text-midnight">
-              <ArrowLeft aria-hidden="true" className="size-4" /> Volver a los Drops
+            <Link href="/drops" className="mb-7 inline-flex items-center gap-2 text-sm font-bold text-slate transition hover:text-midnight">
+              <ArrowLeft aria-hidden="true" className="size-4" /> Volver a las rutas
             </Link>
-            <div className="grid overflow-hidden rounded-[2rem] bg-midnight lg:grid-cols-[1.08fr_0.92fr]">
+            <div className="grid overflow-hidden rounded-[2.75rem] bg-midnight shadow-[0_28px_90px_rgba(13,27,42,.16)] lg:grid-cols-[1.08fr_0.92fr]">
               <div className="relative min-h-[23rem] sm:min-h-[32rem] lg:min-h-[41rem]">
                 <Image
                   src={deal.imageUrl}
@@ -101,7 +101,9 @@ export default async function DropPage({ params }: DropPageProps) {
                 />
                 <div className="absolute left-5 top-5 sm:left-7 sm:top-7"><DealBadge type={deal.dealType} /></div>
               </div>
-              <div className="flex flex-col justify-center p-6 text-white sm:p-10 lg:p-12">
+              <div className="relative flex flex-col justify-center overflow-hidden p-7 text-white sm:p-10 lg:p-12">
+                <Image src="/brand/urway-mark.png" alt="" width={380} height={380} className="pointer-events-none absolute -bottom-24 -right-24 w-80 rotate-[-8deg] opacity-[0.055]" />
+                <div className="relative">
                 <div className="flex flex-wrap items-center gap-3">
                   <DealScore score={deal.score} inverse />
                   <span className="rounded-full border border-white/15 px-3 py-2 text-xs font-bold text-white/65">Actualizado {dateTime.format(new Date(deal.verifiedAt))}</span>
@@ -112,19 +114,20 @@ export default async function DropPage({ params }: DropPageProps) {
                 <div className="mt-8 border-t border-white/12 pt-7">
                   <PriceBlock price={deal.price} normalPrice={deal.normalPrice} savingsPercentage={deal.savingsPercentage} currency={deal.currency} inverse large />
                   <ExternalBookingButton dealId={deal.id} placement="hero" className="mt-6 w-full bg-white text-midnight hover:bg-sand sm:w-auto" />
-                  <p className="mt-3 text-xs leading-5 text-white/45">El precio se confirma en el sitio del proveedor. Abriremos una nueva pestaña.</p>
+                  <p className="mt-3 text-xs leading-5 text-white/45">El precio final se confirma con el proveedor. Abriremos una nueva pestaña para que puedas revisar y reservar.</p>
+                </div>
                 </div>
               </div>
             </div>
           </div>
         </section>
 
-        <section className="py-14 sm:py-20">
+        <section className="py-20 sm:py-28">
           <div className="container-page grid gap-12 lg:grid-cols-[1fr_22rem] lg:items-start lg:gap-16">
             <div>
               <section aria-labelledby="about-title">
-                <p className="text-xs font-extrabold uppercase tracking-[0.16em] text-coral">El veredicto UR WAY</p>
-                <h2 id="about-title" className="mt-2 font-display text-3xl font-extrabold tracking-[-0.05em] sm:text-4xl">Por qué es un buen Drop</h2>
+                <p className="text-xs font-extrabold uppercase tracking-[0.16em] text-coral">La lectura de UR WAY</p>
+                <h2 id="about-title" className="mt-2 font-display text-3xl font-extrabold tracking-[-0.05em] sm:text-4xl">Por qué esta ruta sí conviene</h2>
                 <p className="mt-5 max-w-3xl text-lg leading-8 text-slate">{deal.description}</p>
                 <div className="mt-6 flex flex-wrap gap-2">
                   {deal.tags.map((tag) => <span key={tag} className="rounded-full bg-sand px-3 py-2 text-xs font-bold text-midnight">{tag}</span>)}
@@ -156,7 +159,7 @@ export default async function DropPage({ params }: DropPageProps) {
               <section className="mt-14 rounded-[2rem] bg-sand p-6 sm:p-9" aria-labelledby="score-title">
                 <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
                   <div>
-                    <p className="text-xs font-extrabold uppercase tracking-[0.16em] text-coral">Más que un precio bajo</p>
+                    <p className="text-xs font-extrabold uppercase tracking-[0.16em] text-coral">La tarifa en contexto</p>
                     <h2 id="score-title" className="mt-2 font-display text-3xl font-extrabold tracking-[-0.05em]">Score UR WAY</h2>
                   </div>
                   <DealScore score={deal.score} />
@@ -174,14 +177,14 @@ export default async function DropPage({ params }: DropPageProps) {
               <aside className="mt-10 flex gap-4 rounded-2xl border border-midnight/10 p-5" aria-label="Aviso importante">
                 <Info aria-hidden="true" className="mt-0.5 size-5 shrink-0 text-coral" />
                 <div>
-                  <h2 className="text-sm font-extrabold text-midnight">Antes de reservar</h2>
+                  <h2 className="text-sm font-extrabold text-midnight">Antes de hacer clic en reservar</h2>
                   <p className="mt-2 text-sm leading-6 text-slate">UR WAY no vende ni emite boletos. La tarifa fue verificada al momento indicado, pero puede cambiar o agotarse sin aviso. Confirma precio final, fechas, equipaje, escalas, requisitos migratorios y políticas directamente con el proveedor antes de pagar.</p>
                 </div>
               </aside>
             </div>
 
             <aside className="rounded-[2rem] border border-midnight/8 bg-white p-6 card-shadow lg:sticky lg:top-24" aria-label="Resumen de reserva">
-              <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-coral">Ahorro estimado</p>
+              <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-coral">Lo que podrías ahorrar</p>
               <p className="mt-2 font-display text-3xl font-extrabold tracking-[-0.05em] text-midnight">{formatMoney(deal.savings, deal.currency)}</p>
               <p className="mt-1 text-sm text-slate">frente al precio habitual de {formatMoney(deal.normalPrice, deal.currency)}</p>
               <div className="my-6 h-px bg-midnight/8" />

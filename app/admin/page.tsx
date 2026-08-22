@@ -33,7 +33,7 @@ export default async function AdminDashboardPage() {
         <div>
           <div className="mb-3 flex items-center gap-2 text-[10px] font-extrabold uppercase tracking-[0.2em] text-coral"><span className="size-1.5 rounded-full bg-coral" /> Live desk</div>
           <h1 className="font-display text-3xl font-extrabold tracking-[-0.055em] text-midnight sm:text-4xl">Pulso de oportunidades</h1>
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-slate">La vista editorial de todo lo que detectamos, revisamos y convertimos en viajes que valen la pena.</p>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-slate">La vista editorial de cada tarifa detectada, revisada y lista para convertirse en una ruta que sí conviene.</p>
         </div>
         <div className="inline-flex w-fit items-center gap-2 rounded-full border border-emerald/20 bg-emerald/8 px-3 py-2 text-[10px] font-extrabold uppercase tracking-[0.12em] text-[#087c51]"><Radio size={13} /> Sistema operativo</div>
       </section>
@@ -41,8 +41,8 @@ export default async function AdminDashboardPage() {
       <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4" aria-label="Métricas operativas">
         <AdminStatsCard label="Detectados hoy" value={analytics.detectedToday} helper="Nuevos candidatos" icon={ScanSearch} accent="sky" />
         <AdminStatsCard label="En revisión" value={analytics.inReview} helper="Esperan decisión" icon={Activity} accent="coral" />
-        <AdminStatsCard label="Publicados" value={analytics.published} helper="Drops activos" icon={BookOpenCheck} accent="emerald" />
-        <AdminStatsCard label="Flash Drops" value={analytics.flashDrops} helper="Publicados de alta urgencia" icon={Flame} accent="coral" />
+        <AdminStatsCard label="Publicados" value={analytics.published} helper="Rutas activas" icon={BookOpenCheck} accent="emerald" />
+        <AdminStatsCard label="Tarifas relámpago" value={analytics.flashDrops} helper="Oportunidades urgentes" icon={Flame} accent="coral" />
         <AdminStatsCard label="Clics" value={analytics.clicks.toLocaleString("es-MX")} helper="Salidas a proveedor" icon={MousePointerClick} accent="midnight" />
         <AdminStatsCard label="Vistas" value={analytics.views.toLocaleString("es-MX")} helper="Sesiones acumuladas" icon={Eye} accent="sky" />
         <AdminStatsCard label="CTR" value={`${analytics.ctr}%`} helper="Clics sobre vistas" icon={BarChart3} accent="emerald" />
@@ -57,7 +57,7 @@ export default async function AdminDashboardPage() {
         <div className="grid gap-3 lg:grid-cols-3">
           <RankingCard title="Top destinos" eyebrow="Por clics" items={analytics.topDestinations} />
           <RankingCard title="Top orígenes" eyebrow="Aeropuertos" items={analytics.topAirports} />
-          <RankingCard title="Top Drops" eyebrow="Conversión editorial" items={topDeals} />
+          <RankingCard title="Top oportunidades" eyebrow="Conversión editorial" items={topDeals} />
         </div>
       </section>
 
@@ -65,7 +65,7 @@ export default async function AdminDashboardPage() {
         <div className="mb-5 flex items-end justify-between gap-4">
           <div>
             <p className="text-[10px] font-extrabold uppercase tracking-[0.18em] text-slate">Pipeline editorial</p>
-            <h2 className="mt-1 font-display text-2xl font-extrabold tracking-[-0.045em]">Todos los Drops</h2>
+            <h2 className="mt-1 font-display text-2xl font-extrabold tracking-[-0.045em]">Todas las oportunidades</h2>
           </div>
           <span className="rounded-full border border-midnight/10 bg-white px-3 py-2 text-xs font-bold text-slate">{deals.length} candidatos</span>
         </div>

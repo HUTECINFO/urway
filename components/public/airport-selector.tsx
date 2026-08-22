@@ -9,9 +9,10 @@ interface AirportSelectorProps {
   airports: readonly Airport[];
   selected?: string;
   className?: string;
+  inverse?: boolean;
 }
 
-export function AirportSelector({ airports, selected = "", className = "" }: AirportSelectorProps) {
+export function AirportSelector({ airports, selected = "", className = "", inverse = false }: AirportSelectorProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
@@ -25,7 +26,7 @@ export function AirportSelector({ airports, selected = "", className = "" }: Air
 
   return (
     <div className={`relative ${className}`}>
-      <label htmlFor="origin-airport" className="mb-2 block text-xs font-extrabold uppercase tracking-[0.12em] text-midnight/65">
+      <label htmlFor="origin-airport" className={`mb-2 block text-xs font-extrabold uppercase tracking-[0.12em] ${inverse ? "text-white/60" : "text-midnight/65"}`}>
         Tu aeropuerto de salida
       </label>
       <div className="relative">
@@ -47,8 +48,8 @@ export function AirportSelector({ airports, selected = "", className = "" }: Air
         </select>
         <span aria-hidden="true" className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-slate">▼</span>
       </div>
-      <p id="origin-help" className="mt-2 text-xs text-slate" aria-live="polite">
-        {isPending ? "Buscando Drops…" : "Te mostramos tarifas que salen cerca de ti."}
+      <p id="origin-help" className={`mt-2 text-xs ${inverse ? "text-white/55" : "text-slate"}`} aria-live="polite">
+        {isPending ? "Buscando rutas…" : "Te mostramos oportunidades que salen desde aquí."}
       </p>
     </div>
   );

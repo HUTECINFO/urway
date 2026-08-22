@@ -1,8 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowDownRight, ArrowRight } from "lucide-react";
+import { ArrowDown, ArrowRight } from "lucide-react";
 import type { ReactNode } from "react";
 import type { Deal } from "@/lib/domain/types";
+import { getCountryImageUrl } from "@/lib/media/country-images";
 import { DealBadge } from "./deal-badge";
 import { PriceBlock } from "./price-block";
 
@@ -11,57 +12,53 @@ interface DestinationHeroProps {
   children?: ReactNode;
 }
 
-const fallbackImage = "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?auto=format&fit=crop&w=1600&q=80";
-
 export function DestinationHero({ deal, children }: DestinationHeroProps) {
   return (
-    <section className="overflow-hidden bg-sand">
-      <div className="container-page grid min-h-[calc(100svh-4.5rem)] items-stretch gap-8 py-8 md:grid-cols-[0.9fr_1.1fr] md:gap-10 md:py-12 lg:gap-16">
-        <div className="flex flex-col justify-center py-5">
-          <p className="mb-5 flex items-center gap-3 text-xs font-extrabold uppercase tracking-[0.18em] text-coral">
-            <span className="h-px w-8 bg-coral" /> Curaduría de viajes desde México
-          </p>
-          <h1 className="text-balance font-display text-[clamp(3.25rem,10vw,6.8rem)] font-extrabold leading-[0.88] tracking-[-0.075em] text-midnight">
-            El mundo,<br /><span className="text-coral">UR WAY.</span>
-          </h1>
-          <p className="mt-7 max-w-xl text-balance text-lg leading-8 text-slate sm:text-xl">
-            Menos ruido, mejores viajes. Encontramos, analizamos y explicamos las tarifas que realmente vale la pena reservar.
-          </p>
-          <div className="mt-8 max-w-md">{children}</div>
-          <Link href="#drops" className="mt-7 inline-flex w-fit items-center gap-2 text-sm font-extrabold text-midnight transition hover:gap-3">
-            Explorar Drops de hoy <ArrowDownRight aria-hidden="true" className="size-4" />
-          </Link>
+    <section id="inicio" className="relative min-h-[100svh] overflow-hidden bg-midnight text-white">
+      <Image
+        src={deal?.imageUrl ?? getCountryImageUrl("MX")}
+        alt={deal ? `Vista de ${deal.destination.city}, ${deal.destination.country}` : "Vista aérea desde la ventana de un avión"}
+        fill
+        priority
+        loading="eager"
+        sizes="100vw"
+        className="hero-image object-cover"
+      />
+      <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(13,27,42,.2)_0%,rgba(13,27,42,.18)_30%,rgba(13,27,42,.92)_100%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_18%,rgba(255,122,89,.25),transparent_30%)]" />
+
+      <div className="container-page relative flex min-h-[100svh] flex-col justify-end pb-8 pt-32 sm:pb-10 sm:pt-36 lg:pb-12">
+        <div className="mb-auto flex items-center justify-between gap-4 pt-4">
+          <p className="rounded-full border border-white/20 bg-white/10 px-3 py-2 text-[10px] font-extrabold uppercase tracking-[0.16em] backdrop-blur-md">Selección desde México</p>
+          {deal && <DealBadge type={deal.dealType} />}
         </div>
 
-        <div className="relative min-h-[31rem] overflow-hidden rounded-[2rem] bg-midnight sm:min-h-[38rem] md:min-h-0">
-          <Image
-            src={deal?.imageUrl ?? fallbackImage}
-            alt={deal ? `Vista de ${deal.destination.city}, ${deal.destination.country}` : "Vista aérea desde la ventana de un avión"}
-            fill
-            priority
-            sizes="(max-width: 768px) 100vw, 55vw"
-            className="object-cover"
-          />
-          <div className="absolute inset-x-4 top-4 flex items-start justify-between gap-3 sm:inset-x-6 sm:top-6">
-            {deal ? <DealBadge type={deal.dealType} /> : <span className="rounded-full bg-white px-3 py-2 text-[10px] font-extrabold uppercase tracking-[0.14em] text-midnight">Selección editorial</span>}
-            <span className="rounded-full bg-midnight/70 px-3 py-2 text-[10px] font-bold uppercase tracking-[0.12em] text-white backdrop-blur-md">Verificado por UR WAY</span>
+        <div className="grid gap-8 lg:grid-cols-[1fr_22rem] lg:items-end">
+          <div>
+            <p className="mb-4 text-xs font-extrabold uppercase tracking-[0.2em] text-coral">El precio correcto cambia el viaje.</p>
+            <h1 className="max-w-5xl text-balance font-display text-[clamp(4rem,11vw,9.5rem)] font-extrabold leading-[0.78] tracking-[-0.085em]">
+              Viaja más.<br /><span className="text-coral">Busca menos.</span>
+            </h1>
+            <p className="mt-6 max-w-2xl text-balance text-base leading-7 text-white/72 sm:text-xl sm:leading-8">Detectamos tarifas fuera de lo común, revisamos cada detalle y te mostramos solo lo que sí vale la pena reservar.</p>
           </div>
-          {deal && (
-            <div className="absolute inset-x-4 bottom-4 rounded-[1.5rem] bg-midnight/90 p-5 text-white backdrop-blur-md sm:inset-x-6 sm:bottom-6 sm:p-7">
-              <p className="text-xs font-bold uppercase tracking-[0.14em] text-white/60">Drop destacado · {deal.origin.city}</p>
-              <div className="mt-2 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
-                <div>
-                  <h2 className="font-display text-3xl font-extrabold tracking-[-0.05em]">{deal.destination.city}</h2>
-                  <PriceBlock price={deal.price} normalPrice={deal.normalPrice} savingsPercentage={deal.savingsPercentage} currency={deal.currency} inverse />
-                </div>
-                <Link href={`/drop/${deal.slug}`} className="inline-flex min-h-12 shrink-0 items-center justify-center gap-2 rounded-full bg-white px-5 text-sm font-extrabold text-midnight transition hover:bg-sand">
-                  Ver el Drop <ArrowRight aria-hidden="true" className="size-4" />
-                </Link>
-              </div>
-            </div>
-          )}
+          <div className="rounded-[1.75rem] border border-white/18 bg-white/12 p-4 backdrop-blur-xl sm:p-5">
+            {children}
+          </div>
         </div>
-      </div>
+
+        {deal && (
+          <div className="mt-8 flex flex-col gap-5 border-t border-white/18 pt-6 sm:flex-row sm:items-end sm:justify-between">
+            <div className="flex items-end gap-5">
+              <div><p className="text-[10px] font-bold uppercase tracking-[0.16em] text-white/45">Oportunidad destacada</p><h2 className="mt-1 font-display text-3xl font-extrabold tracking-[-0.055em] sm:text-4xl">{deal.destination.city}</h2></div>
+              <PriceBlock price={deal.price} normalPrice={deal.normalPrice} savingsPercentage={deal.savingsPercentage} currency={deal.currency} inverse />
+            </div>
+            <div className="flex flex-wrap gap-3">
+              <Link href="#drops" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl border border-white/22 px-5 text-sm font-extrabold text-white transition hover:bg-white hover:text-midnight">Ver la selección <ArrowDown aria-hidden="true" className="size-4" /></Link>
+              <Link href={`/drop/${deal.slug}`} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-coral px-5 text-sm font-extrabold text-midnight transition hover:bg-white">Ver la oportunidad <ArrowRight aria-hidden="true" className="size-4" /></Link>
+            </div>
+          </div>
+        )}
+        </div>
     </section>
   );
 }

@@ -33,7 +33,7 @@
 }
 
 html {
-  scroll-behavior: smooth;
+  scroll-behavior: auto;
 }
 
 body {
@@ -75,4 +75,106 @@ textarea:focus-visible {
 
 @utility card-shadow {
   box-shadow: 0 18px 60px rgba(13, 27, 42, 0.08);
+}
+
+.dynamic-island {
+  transform-origin: top center;
+  contain: layout paint;
+}
+
+.hero-image {
+  animation: hero-breathe 1200ms ease-out both;
+}
+
+.flight-heading {
+  display: inline-flex;
+  position: relative;
+  z-index: 2;
+  transition: transform 240ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  will-change: transform;
+}
+
+.flight-heading--down {
+  transform: translate3d(1px, 2px, 0) rotate(88deg);
+}
+
+.flight-heading--up {
+  transform: translate3d(1px, -2px, 0) rotate(2deg);
+}
+
+.flight-craft {
+  display: inline-flex;
+  filter: drop-shadow(0 5px 8px rgba(255, 122, 89, 0.22));
+}
+
+.flight-wind-field {
+  position: absolute;
+  inset: 0;
+  transition: transform 240ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.flight-wind-field--up {
+  transform: scaleY(-1);
+}
+
+.flight-wind {
+  position: absolute;
+  display: block;
+  width: 1.65rem;
+  height: 1px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.48), var(--coral));
+  opacity: 0;
+  transform: rotate(-42deg);
+  animation: flight-wind 1.45s linear infinite;
+  will-change: transform, opacity;
+}
+
+.flight-wind--1 { left: 0.35rem; top: 0.7rem; animation-delay: -0.2s; }
+.flight-wind--2 { left: 1.8rem; top: 0.2rem; width: 1.15rem; animation-delay: -1.05s; }
+.flight-wind--3 { left: 0.1rem; top: 2.4rem; width: 1.35rem; animation-delay: -0.65s; }
+.flight-wind--4 { left: 2rem; top: 3.15rem; width: 1rem; animation-delay: -1.3s; }
+.flight-wind--5 { right: 0.2rem; top: 0.45rem; width: 1.25rem; animation-delay: -0.85s; }
+.flight-wind--6 { right: 0.3rem; top: 2.55rem; width: 1.6rem; animation-delay: -0.4s; }
+.flight-wind--7 { right: 1.65rem; top: 3.55rem; width: 1.1rem; animation-delay: -1.18s; }
+
+.flight-control::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(circle at 50% 50%, rgba(255, 122, 89, 0.1), transparent 58%);
+  animation: flight-engine-glow 2.2s ease-in-out infinite;
+}
+
+@keyframes hero-breathe {
+  from { transform: scale(1.06); }
+  to { transform: scale(1); }
+}
+
+@keyframes flight-wind {
+  0% {
+    opacity: 0;
+    transform: translate3d(13px, -13px, 0) rotate(-42deg) scaleX(0.2);
+  }
+  24% { opacity: 0.76; }
+  60% { opacity: 0.42; }
+  100% {
+    opacity: 0;
+    transform: translate3d(-14px, 14px, 0) rotate(-42deg) scaleX(1.05);
+  }
+}
+
+@keyframes flight-engine-glow {
+  0%, 100% { opacity: 0.45; transform: scale(0.9); }
+  50% { opacity: 1; transform: scale(1.05); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .hero-image,
+  .flight-control::after,
+  .flight-wind {
+    animation: none;
+  }
 }

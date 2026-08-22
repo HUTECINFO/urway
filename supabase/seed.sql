@@ -14,18 +14,18 @@ on conflict (id) do nothing;
 insert into public.destinations (
   id, city, country, slug, popularity_score, active, airport_code, image_url
 ) values
-  ('20000000-0000-4000-8000-000000000001', 'Tokio', 'Japón', 'tokio-japon', 96.00, true, 'NRT', 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?auto=format&fit=crop&w=1600&q=80'),
-  ('20000000-0000-4000-8000-000000000002', 'Madrid', 'España', 'madrid-espana', 95.00, true, 'MAD', 'https://images.unsplash.com/photo-1539037116277-4db20889f2d4?auto=format&fit=crop&w=1600&q=80'),
-  ('20000000-0000-4000-8000-000000000003', 'Nueva York', 'Estados Unidos', 'nueva-york-estados-unidos', 97.00, true, 'JFK', 'https://images.unsplash.com/photo-1485871981521-5b1fd3805eee?auto=format&fit=crop&w=1600&q=80'),
-  ('20000000-0000-4000-8000-000000000004', 'París', 'Francia', 'paris-francia', 95.00, true, 'CDG', 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=1600&q=80'),
-  ('20000000-0000-4000-8000-000000000005', 'Vancouver', 'Canadá', 'vancouver-canada', 88.00, true, 'YVR', 'https://images.unsplash.com/photo-1559511260-66a654ae982a?auto=format&fit=crop&w=1600&q=80'),
-  ('20000000-0000-4000-8000-000000000006', 'Cancún', 'México', 'cancun-mexico', 98.00, true, 'CUN', 'https://images.unsplash.com/photo-1552074284-5e88ef1aef18?auto=format&fit=crop&w=1600&q=80'),
-  ('20000000-0000-4000-8000-000000000007', 'Las Vegas', 'Estados Unidos', 'las-vegas-estados-unidos', 89.00, true, 'LAS', 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1600&q=80'),
-  ('20000000-0000-4000-8000-000000000008', 'Bogotá', 'Colombia', 'bogota-colombia', 87.00, true, 'BOG', 'https://images.unsplash.com/photo-1536086845797-31a1e17fc7db?auto=format&fit=crop&w=1600&q=80'),
-  ('20000000-0000-4000-8000-000000000009', 'Los Ángeles', 'Estados Unidos', 'los-angeles-estados-unidos', 92.00, true, 'LAX', 'https://images.unsplash.com/photo-1534190760961-74e8c1c5c3da?auto=format&fit=crop&w=1600&q=80'),
-  ('20000000-0000-4000-8000-000000000010', 'Lima', 'Perú', 'lima-peru', 90.00, true, 'LIM', 'https://images.unsplash.com/photo-1531968455001-5c5272a41129?auto=format&fit=crop&w=1600&q=80'),
-  ('20000000-0000-4000-8000-000000000011', 'La Habana', 'Cuba', 'la-habana-cuba', 86.00, true, 'HAV', 'https://images.unsplash.com/photo-1500759285222-a95626b934cb?auto=format&fit=crop&w=1600&q=80'),
-  ('20000000-0000-4000-8000-000000000012', 'Buenos Aires', 'Argentina', 'buenos-aires-argentina', 91.00, true, 'EZE', 'https://images.unsplash.com/photo-1589909202802-8f4aadce1849?auto=format&fit=crop&w=1600&q=80')
+  ('20000000-0000-4000-8000-000000000001', 'Tokio', 'Japón', 'tokio-japon', 96.00, true, 'NRT', 'https://oslofsjhdazecucooqig.supabase.co/storage/v1/object/public/country-images/countries/jp.webp'),
+  ('20000000-0000-4000-8000-000000000002', 'Madrid', 'España', 'madrid-espana', 95.00, true, 'MAD', 'https://oslofsjhdazecucooqig.supabase.co/storage/v1/object/public/country-images/countries/es.webp'),
+  ('20000000-0000-4000-8000-000000000003', 'Nueva York', 'Estados Unidos', 'nueva-york-estados-unidos', 97.00, true, 'JFK', 'https://oslofsjhdazecucooqig.supabase.co/storage/v1/object/public/country-images/countries/us.webp'),
+  ('20000000-0000-4000-8000-000000000004', 'París', 'Francia', 'paris-francia', 95.00, true, 'CDG', 'https://oslofsjhdazecucooqig.supabase.co/storage/v1/object/public/country-images/countries/fr.webp'),
+  ('20000000-0000-4000-8000-000000000005', 'Vancouver', 'Canadá', 'vancouver-canada', 88.00, true, 'YVR', 'https://oslofsjhdazecucooqig.supabase.co/storage/v1/object/public/country-images/countries/ca.webp'),
+  ('20000000-0000-4000-8000-000000000006', 'Cancún', 'México', 'cancun-mexico', 98.00, true, 'CUN', 'https://oslofsjhdazecucooqig.supabase.co/storage/v1/object/public/country-images/countries/mx.webp'),
+  ('20000000-0000-4000-8000-000000000007', 'Las Vegas', 'Estados Unidos', 'las-vegas-estados-unidos', 89.00, true, 'LAS', 'https://oslofsjhdazecucooqig.supabase.co/storage/v1/object/public/country-images/countries/us.webp'),
+  ('20000000-0000-4000-8000-000000000008', 'Bogotá', 'Colombia', 'bogota-colombia', 87.00, true, 'BOG', 'https://oslofsjhdazecucooqig.supabase.co/storage/v1/object/public/country-images/countries/co.webp'),
+  ('20000000-0000-4000-8000-000000000009', 'Los Ángeles', 'Estados Unidos', 'los-angeles-estados-unidos', 92.00, true, 'LAX', 'https://oslofsjhdazecucooqig.supabase.co/storage/v1/object/public/country-images/countries/us.webp'),
+  ('20000000-0000-4000-8000-000000000010', 'Lima', 'Perú', 'lima-peru', 90.00, true, 'LIM', 'https://oslofsjhdazecucooqig.supabase.co/storage/v1/object/public/country-images/countries/pe.webp'),
+  ('20000000-0000-4000-8000-000000000011', 'La Habana', 'Cuba', 'la-habana-cuba', 86.00, true, 'HAV', 'https://oslofsjhdazecucooqig.supabase.co/storage/v1/object/public/country-images/countries/cu.webp'),
+  ('20000000-0000-4000-8000-000000000012', 'Buenos Aires', 'Argentina', 'buenos-aires-argentina', 91.00, true, 'EZE', 'https://oslofsjhdazecucooqig.supabase.co/storage/v1/object/public/country-images/countries/ar.webp')
 on conflict (id) do nothing;
 
 insert into public.deals (
@@ -49,7 +49,7 @@ insert into public.deals (
     10890.00, 'MXN', 18990.00, 42.65, 'ROUND_TRIP', '2026-05-12', '2026-05-14',
     '2026-05-22', '2026-05-24', 10, 870, 0, 'Aeroméxico',
     'Artículo personal, equipaje de mano de 10 kg y una maleta documentada de 23 kg',
-    'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?auto=format&fit=crop&w=1600&q=80',
+    'https://oslofsjhdazecucooqig.supabase.co/storage/v1/object/public/country-images/countries/jp.webp',
     'FLASH', 96.00, 98.00, 96.00, 96.00, 94.00, 96.00, 'PUBLISHED',
     now() - interval '2 days', now() - interval '36 hours', now() - interval '30 hours',
     now() + interval '45 days', 'urway:mex:nrt:am58:rt:10890:mxn', 3420, 12680.00, 14, null
@@ -64,7 +64,7 @@ insert into public.deals (
     9490.00, 'MXN', 16990.00, 44.14, 'ROUND_TRIP', '2026-05-28', '2026-05-30',
     '2026-06-06', '2026-06-08', 9, 660, 0, 'Iberia',
     'Artículo personal y equipaje de mano de 10 kg',
-    'https://images.unsplash.com/photo-1539037116277-4db20889f2d4?auto=format&fit=crop&w=1600&q=80',
+    'https://oslofsjhdazecucooqig.supabase.co/storage/v1/object/public/country-images/countries/es.webp',
     'LONG_HAUL', 94.00, 97.00, 95.00, 95.00, 92.00, 93.00, 'PUBLISHED',
     now() - interval '2 days', now() - interval '36 hours', now() - interval '30 hours',
     now() + interval '45 days', 'urway:mex:mad:ib304:rt:9490:mxn', 2980, 10440.00, 12, null
@@ -79,7 +79,7 @@ insert into public.deals (
     11990.00, 'MXN', 19490.00, 38.48, 'ROUND_TRIP', '2026-06-10', '2026-06-12',
     '2026-06-18', '2026-06-20', 8, 845, 1, 'Aeroméxico',
     'Artículo personal, equipaje de mano de 10 kg y una maleta documentada de 23 kg',
-    'https://images.unsplash.com/photo-1543783207-ec64e4d95325?auto=format&fit=crop&w=1600&q=80',
+    'https://oslofsjhdazecucooqig.supabase.co/storage/v1/object/public/country-images/countries/es.webp',
     'LONG_HAUL', 87.00, 91.00, 88.00, 95.00, 86.00, 78.00, 'APPROVED',
     now() - interval '1 day', now() - interval '12 hours', null,
     now() + interval '45 days', 'urway:bjx:mad:am153:rt:11990:mxn', 0, 0.00, 0, null
@@ -94,7 +94,7 @@ insert into public.deals (
     4190.00, 'MXN', 7790.00, 46.21, 'ROUND_TRIP', '2026-04-23', '2026-04-25',
     '2026-04-28', '2026-04-30', 5, 305, 0, 'Viva',
     'Artículo personal incluido; equipaje adicional con costo',
-    'https://images.unsplash.com/photo-1485871981521-5b1fd3805eee?auto=format&fit=crop&w=1600&q=80',
+    'https://oslofsjhdazecucooqig.supabase.co/storage/v1/object/public/country-images/countries/us.webp',
     'FLASH', 93.00, 98.00, 97.00, 97.00, 91.00, 82.00, 'PUBLISHED',
     now() - interval '2 days', now() - interval '36 hours', now() - interval '30 hours',
     now() + interval '45 days', 'urway:mex:jfk:vb100:rt:4190:mxn', 2640, 8750.00, 11, null
@@ -109,7 +109,7 @@ insert into public.deals (
     10990.00, 'MXN', 19990.00, 45.02, 'ROUND_TRIP', '2026-06-19', '2026-06-21',
     '2026-06-28', '2026-06-30', 9, 850, 1, 'Air France',
     'Artículo personal y equipaje de mano de 12 kg',
-    'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=1600&q=80',
+    'https://oslofsjhdazecucooqig.supabase.co/storage/v1/object/public/country-images/countries/fr.webp',
     'LONG_HAUL', 88.00, 95.00, 96.00, 95.00, 87.00, 70.00, 'REVIEW',
     now() - interval '6 hours', null, null, now() + interval '45 days',
     'urway:gdl:cdg:af179:rt:10990:mxn', 0, 0.00, 0, null
@@ -124,7 +124,7 @@ insert into public.deals (
     5490.00, 'MXN', 9490.00, 42.15, 'ROUND_TRIP', '2026-07-08', '2026-07-10',
     '2026-07-14', '2026-07-16', 6, 300, 0, 'Air Canada',
     'Artículo personal y equipaje de mano de 10 kg',
-    'https://images.unsplash.com/photo-1559511260-66a654ae982a?auto=format&fit=crop&w=1600&q=80',
+    'https://oslofsjhdazecucooqig.supabase.co/storage/v1/object/public/country-images/countries/ca.webp',
     'CITY', 89.00, 93.00, 93.00, 88.00, 89.00, 85.00, 'APPROVED',
     now() - interval '1 day', now() - interval '12 hours', null,
     now() + interval '45 days', 'urway:mty:yvr:ac996:rt:5490:mxn', 0, 0.00, 0, null
@@ -139,7 +139,7 @@ insert into public.deals (
     1490.00, 'MXN', 3690.00, 59.62, 'ROUND_TRIP', '2026-04-03', '2026-04-05',
     '2026-04-06', '2026-04-08', 3, 135, 0, 'Viva',
     'Artículo personal incluido; equipaje adicional con costo',
-    'https://images.unsplash.com/photo-1552074284-5e88ef1aef18?auto=format&fit=crop&w=1600&q=80',
+    'https://oslofsjhdazecucooqig.supabase.co/storage/v1/object/public/country-images/countries/mx.webp',
     'TODAY', 83.00, 100.00, 100.00, 98.00, 82.00, 88.00, 'DISCOVERED',
     now() - interval '30 minutes', null, null, now() + interval '45 days',
     'urway:nlu:cun:vb2282:rt:1490:mxn', 0, 0.00, 0, null
@@ -154,7 +154,7 @@ insert into public.deals (
     2990.00, 'MXN', 5790.00, 48.36, 'ROUND_TRIP', '2026-07-17', '2026-07-19',
     '2026-07-20', '2026-07-22', 3, 315, 1, 'Viva',
     'Artículo personal incluido; equipaje de mano disponible con costo',
-    'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1600&q=80',
+    'https://oslofsjhdazecucooqig.supabase.co/storage/v1/object/public/country-images/countries/us.webp',
     'WEEKEND', 78.00, 96.00, 98.00, 89.00, 76.00, 61.00, 'REVIEW',
     now() - interval '6 hours', null, null, now() + interval '45 days',
     'urway:qro:las:vb602:rt:2990:mxn', 0, 0.00, 0, null
@@ -169,7 +169,7 @@ insert into public.deals (
     9990.00, 'MXN', 17990.00, 44.47, 'ROUND_TRIP', '2026-09-07', '2026-09-09',
     '2026-09-17', '2026-09-19', 10, 690, 0, 'ZIPAIR',
     'Artículo personal y equipaje de mano de 7 kg',
-    'https://images.unsplash.com/photo-1536098561742-ca998e48cbcc?auto=format&fit=crop&w=1600&q=80',
+    'https://oslofsjhdazecucooqig.supabase.co/storage/v1/object/public/country-images/countries/jp.webp',
     'FLASH', 92.00, 98.00, 95.00, 96.00, 90.00, 91.00, 'APPROVED',
     now() - interval '1 day', now() - interval '12 hours', null,
     now() + interval '45 days', 'urway:tij:nrt:zg25:rt:9990:mxn', 0, 0.00, 0, null
@@ -184,7 +184,7 @@ insert into public.deals (
     4590.00, 'MXN', 8290.00, 44.63, 'ROUND_TRIP', '2026-02-13', '2026-02-15',
     '2026-02-18', '2026-02-20', 5, 205, 0, 'Volaris',
     'Artículo personal incluido',
-    'https://images.unsplash.com/photo-1536086845797-31a1e17fc7db?auto=format&fit=crop&w=1600&q=80',
+    'https://oslofsjhdazecucooqig.supabase.co/storage/v1/object/public/country-images/countries/co.webp',
     'CITY', 75.00, 94.00, 95.00, 87.00, 71.00, 65.00, 'EXPIRED',
     now() - interval '30 days', now() - interval '29 days', now() - interval '29 days',
     now() - interval '10 days', 'urway:cun:bog:y43912:rt:4590:mxn', 1890, 3120.00, 6, null
@@ -199,7 +199,7 @@ insert into public.deals (
     3290.00, 'MXN', 6190.00, 46.85, 'ROUND_TRIP', '2026-08-21', '2026-08-23',
     '2026-08-24', '2026-08-26', 3, 205, 0, 'Volaris',
     'Artículo personal incluido; equipaje adicional con costo',
-    'https://images.unsplash.com/photo-1534190760961-74e8c1c5c3da?auto=format&fit=crop&w=1600&q=80',
+    'https://oslofsjhdazecucooqig.supabase.co/storage/v1/object/public/country-images/countries/us.webp',
     'WEEKEND', 70.00, 94.00, 97.00, 92.00, 78.00, 58.00, 'REJECTED',
     now() - interval '8 hours', now() - interval '6 hours', null,
     now() + interval '45 days', 'urway:gdl:lax:y41710:rt:3290:mxn', 0, 0.00, 0,
@@ -215,7 +215,7 @@ insert into public.deals (
     6990.00, 'MXN', 11990.00, 41.70, 'ROUND_TRIP', '2026-08-06', '2026-08-08',
     '2026-08-13', '2026-08-15', 7, 355, 0, 'LATAM',
     'Artículo personal y equipaje de mano de 10 kg',
-    'https://images.unsplash.com/photo-1531968455001-5c5272a41129?auto=format&fit=crop&w=1600&q=80',
+    'https://oslofsjhdazecucooqig.supabase.co/storage/v1/object/public/country-images/countries/pe.webp',
     'CITY', 90.00, 94.00, 93.00, 90.00, 89.00, 91.00, 'PUBLISHED',
     now() - interval '2 days', now() - interval '36 hours', now() - interval '30 hours',
     now() + interval '45 days', 'urway:mex:lim:la2473:rt:6990:mxn', 1760, 5460.00, 7, null
@@ -230,7 +230,7 @@ insert into public.deals (
     3490.00, 'MXN', 6490.00, 46.22, 'ROUND_TRIP', '2026-09-18', '2026-09-20',
     '2026-09-23', '2026-09-25', 5, 310, 1, 'Viva',
     'Artículo personal incluido; equipaje adicional con costo',
-    'https://images.unsplash.com/photo-1500759285222-a95626b934cb?auto=format&fit=crop&w=1600&q=80',
+    'https://oslofsjhdazecucooqig.supabase.co/storage/v1/object/public/country-images/countries/cu.webp',
     'BEACH', 80.00, 94.00, 97.00, 91.00, 82.00, 68.00, 'DISCOVERED',
     now() - interval '30 minutes', null, null, now() + interval '45 days',
     'urway:mty:hav:vb312:rt:3490:mxn', 0, 0.00, 0, null
@@ -245,7 +245,7 @@ insert into public.deals (
     12490.00, 'MXN', 20990.00, 40.50, 'ROUND_TRIP', '2026-10-09', '2026-10-11',
     '2026-10-19', '2026-10-21', 10, 825, 1, 'Copa Airlines',
     'Artículo personal, equipaje de mano de 10 kg y una maleta documentada de 23 kg',
-    'https://images.unsplash.com/photo-1589909202802-8f4aadce1849?auto=format&fit=crop&w=1600&q=80',
+    'https://oslofsjhdazecucooqig.supabase.co/storage/v1/object/public/country-images/countries/ar.webp',
     'LONG_HAUL', 91.00, 93.00, 90.00, 91.00, 92.00, 89.00, 'PUBLISHED',
     now() - interval '2 days', now() - interval '36 hours', now() - interval '30 hours',
     now() + interval '45 days', 'urway:mex:eze:cm195:rt:12490:mxn', 1580, 4820.00, 5, null

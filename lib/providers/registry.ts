@@ -1,5 +1,6 @@
 import { MockFlightProvider, mockFlightProvider } from "./mock-flight-provider";
 import { SerpApiProvider, type SerpApiProviderOptions } from "./serp-api-provider";
+import { TravelpayoutsProvider, type TravelpayoutsProviderOptions } from "./travelpayouts-provider";
 import type { FlightDealProvider } from "./types";
 
 export class ProviderRegistry {
@@ -49,6 +50,7 @@ export class ProviderRegistry {
 export interface DefaultProviderRegistryOptions {
   mock?: boolean | ConstructorParameters<typeof MockFlightProvider>[0];
   serpApi?: false | SerpApiProviderOptions;
+  travelPayouts?: false | TravelpayoutsProviderOptions;
 }
 
 export function createDefaultProviderRegistry(
@@ -64,6 +66,9 @@ export function createDefaultProviderRegistry(
   }
   if (options.serpApi !== undefined && options.serpApi !== false) {
     providers.push(new SerpApiProvider(options.serpApi));
+  }
+  if (options.travelPayouts !== undefined && options.travelPayouts !== false) {
+    providers.push(new TravelpayoutsProvider(options.travelPayouts));
   }
   return new ProviderRegistry(providers);
 }

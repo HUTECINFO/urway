@@ -57,4 +57,6 @@ npm run build
 - `RESEND_API_KEY`: habilita el cliente transaccional preparado.
 - Firebase Cloud Messaging queda desacoplado mediante la interfaz `PushProvider`.
 
+El cron de descubrimiento usa Travelpayouts como proveedor principal cuando `TRAVELPAYOUTS_API_TOKEN` está configurado; los resultados incluyen únicamente tarifas marcadas para afiliados (`show_to_affiliates=true`).
+
 Los cron jobs de Vercel están definidos en `vercel.json`.

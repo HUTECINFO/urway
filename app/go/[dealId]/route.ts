@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { captureServerEvent } from "@/lib/analytics/posthog";
 import { getDealById, recordDealClick } from "@/lib/data/deals";
-import { isGoogleFlightsUrl } from "@/lib/booking/flight-link";
-import { SerpApiProvider } from "@/lib/providers/serp-api-provider";
 import { TravelpayoutsProvider } from "@/lib/providers/travelpayouts-provider";
 
 interface RouteContext {
@@ -38,18 +36,6 @@ function resolvingResponse(dealId: string, slug: string, sessionId: string): Nex
   return withSessionCookie(response, sessionId);
 }
 
-async function within<T>(promise: Promise<T>, timeoutMs: number, fallback: T): Promise<T> {
-  let timer: ReturnType<typeof setTimeout> | undefined;
-  try {
-    return await Promise.race([
-      promise,
-      new Promise<T>((resolve) => { timer = setTimeout(() => resolve(fallback), timeoutMs); }),
-    ]);
-  } finally {
-    if (timer) clearTimeout(timer);
-  }
-}
-
 export async function GET(request: NextRequest, { params }: RouteContext) {
   const { dealId } = await params;
   const url = new URL(request.url);
@@ -61,14 +47,8 @@ export async function GET(request: NextRequest, { params }: RouteContext) {
     const storedDestination = new URL(deal.bookingUrl);
 
     if (url.searchParams.get("resolve") === "1") {
-      const travelpayoutsPromise = new TravelpayoutsProvider({ requestTimeoutMs: 6_000 })
+      const booking = await new TravelpayoutsProvider({ requestTimeoutMs: 6_000 })
         .getBookingRequestForDeal(deal);
-      const serpBooking = await within(
-        new SerpApiProvider({ requestTimeoutMs: 5_000 }).getBookingRequestForDeal(deal),
-        12_000,
-        null,
-      );
-      const booking = serpBooking ?? await travelpayoutsPromise;
       if (booking) {
         return NextResponse.json({
           url: booking.url,
@@ -77,7 +57,7 @@ export async function GET(request: NextRequest, { params }: RouteContext) {
           price: booking.price,
         }, { headers: { "cache-control": "no-store" } });
       }
-      if (deal.provider !== "serpapi" && !isGoogleFlightsUrl(storedDestination)) {
+      if (deal.provider !== "travelpayouts" && !storedDestination.hostname.includes("google.com")) {
         return NextResponse.json({ url: storedDestination.toString() }, { headers: { "cache-control": "no-store" } });
       }
       return NextResponse.json({ error: "fare-unavailable" }, { status: 410, headers: { "cache-control": "no-store" } });

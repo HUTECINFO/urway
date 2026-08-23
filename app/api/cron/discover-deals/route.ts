@@ -22,8 +22,11 @@ export async function GET(request: Request) {
   const returnFrom = new Date(departureFrom.getTime() + 5 * 86_400_000);
   const returnTo = new Date(departureTo.getTime() + 14 * 86_400_000);
   const registry = createDefaultProviderRegistry({
-    mock: true,
-    serpApi: process.env.SERPAPI_KEY ? { active: true } : false,
+    mock: false,
+    serpApi: false,
+    travelPayouts: process.env.TRAVELPAYOUTS_API_TOKEN
+      ? { active: true }
+      : false,
   });
   const results = await Promise.all(DESTINATION_RADARS.map(({ destinations }) => discoverDeals({
     origins: MEXICAN_ORIGINS,

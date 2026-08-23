@@ -1,5 +1,11 @@
-import { TripType, type Deal } from "@/lib/domain/types";
+import { getAirport } from "@/lib/demo/airports";
+import { TripType, type Airport, type Deal } from "@/lib/domain/types";
 import type { ProviderBookingRequest } from "@/lib/providers/serp-api-provider";
+import type {
+  DealSearchParams,
+  FlightDealProvider,
+  NormalizedFlightDeal,
+} from "@/lib/providers/types";
 
 interface TravelpayoutsOffer {
   origin?: string;
@@ -9,6 +15,8 @@ interface TravelpayoutsOffer {
   flight_number?: string;
   departure_at?: string;
   return_at?: string;
+  transfers?: number;
+  duration?: number;
   link?: string;
 }
 
@@ -24,6 +32,7 @@ export interface TravelpayoutsProviderOptions {
   endpoint?: string;
   fetch?: typeof fetch;
   requestTimeoutMs?: number;
+  active?: boolean;
 }
 
 type BookingDeal = Pick<
@@ -45,6 +54,19 @@ const environmentMarker = () => process.env.TRAVELPAYOUTS_MARKER?.trim()
   || process.env.TRAVELPAYOUTS_PARTNER_ID?.trim();
 
 const datePart = (value: string): string => value.slice(0, 10);
+
+const asIsoDate = (value: string | undefined, fallback: string): string => {
+  const candidate = value ? new Date(value) : new Date(fallback);
+  return Number.isNaN(candidate.getTime()) ? new Date(fallback).toISOString() : candidate.toISOString();
+};
+
+const safeAirport = (code: string, fallback: Airport): Airport => {
+  try {
+    return getAirport(code);
+  } catch {
+    return fallback;
+  }
+};
 
 const dayMonth = (value: string): string => {
   const [year, month, day] = datePart(value).split("-");
@@ -93,7 +115,10 @@ const offerUrl = (link: string | undefined, marker: string | undefined): URL | n
 const priceIsClose = (price: number | undefined, target: number): price is number =>
   Number.isFinite(price) && Math.abs((price as number) - target) <= Math.max(500, target * 0.05);
 
-export class TravelpayoutsProvider {
+export class TravelpayoutsProvider implements FlightDealProvider {
+  readonly id = "travelpayouts";
+  readonly name = "Travelpayouts Aviasales Data API";
+  readonly isActive: boolean;
   private readonly token?: string;
   private readonly marker?: string;
   private readonly endpoint: string;
@@ -106,6 +131,102 @@ export class TravelpayoutsProvider {
     this.endpoint = options.endpoint ?? "https://api.travelpayouts.com/aviasales/v3/prices_for_dates";
     this.fetcher = options.fetch ?? fetch;
     this.requestTimeoutMs = options.requestTimeoutMs ?? 6_000;
+    this.isActive = options.active ?? Boolean(this.token);
+  }
+
+  private async fetchRouteOffers(
+    originCode: string,
+    destinationCode: string,
+    params: DealSearchParams,
+  ): Promise<TravelpayoutsOffer[]> {
+    if (!this.token) return [];
+    const query = new URLSearchParams({
+      origin: originCode,
+      destination: destinationCode,
+      departure_at: params.departureDateFrom.slice(0, 7),
+      currency: (params.currency ?? "MXN").toLowerCase(),
+      unique: "false",
+      sorting: "price",
+      direct: "false",
+      show_to_affiliates: "true",
+      limit: "30",
+      page: "1",
+      one_way: String(params.tripType === TripType.ONE_WAY),
+    });
+    if (params.tripType === TripType.ROUND_TRIP && params.returnDateFrom) {
+      query.set("return_at", params.returnDateFrom.slice(0, 7));
+    }
+    const response = await this.fetcher(`${this.endpoint}?${query.toString()}`, {
+      headers: { Accept: "application/json", "X-Access-Token": this.token },
+      signal: AbortSignal.timeout(this.requestTimeoutMs),
+    });
+    if (!response.ok) return [];
+    const payload = (await response.json()) as TravelpayoutsResponse;
+    return payload.success && Array.isArray(payload.data) ? payload.data : [];
+  }
+
+  async fetchDeals(params: DealSearchParams): Promise<readonly NormalizedFlightDeal[]> {
+    if (!this.isActive || !this.token) return [];
+    if (!params.destinations?.length) return [];
+
+    const routes = params.origins.flatMap((origin) =>
+      params.destinations!.map((destination) => ({ origin, destination })),
+    );
+    const settled = await Promise.allSettled(
+      routes.map(({ origin, destination }) => this.fetchRouteOffers(origin, destination, params)),
+    );
+    const departureFrom = new Date(params.departureDateFrom).getTime();
+    const departureTo = new Date(params.departureDateTo).getTime();
+    const returnFrom = params.returnDateFrom ? new Date(params.returnDateFrom).getTime() : undefined;
+    const returnTo = params.returnDateTo ? new Date(params.returnDateTo).getTime() : undefined;
+    const currency = params.currency?.trim().toUpperCase() || "MXN";
+    const deals: NormalizedFlightDeal[] = [];
+
+    settled.forEach((result, index) => {
+      if (result.status !== "fulfilled") return;
+      const route = routes[index];
+      const origin = safeAirport(route.origin, getAirport("MEX"));
+      const destination = safeAirport(route.destination, getAirport(route.destination));
+      result.value.forEach((offer, offerIndex) => {
+        if (!Number.isFinite(offer.price) || !offer.link) return;
+        const departureDate = asIsoDate(offer.departure_at, params.departureDateFrom);
+        const returnDate = params.tripType === TripType.ONE_WAY
+          ? undefined
+          : asIsoDate(offer.return_at, params.returnDateFrom ?? params.departureDateFrom);
+        const departureTime = new Date(departureDate).getTime();
+        const returnTime = returnDate ? new Date(returnDate).getTime() : undefined;
+        if (departureTime < departureFrom || departureTime > departureTo) return;
+        if (returnFrom !== undefined && returnTime !== undefined && returnTime < returnFrom) return;
+        if (returnTo !== undefined && returnTime !== undefined && returnTime > returnTo) return;
+        if (params.maxPrice !== undefined && (offer.price as number) > params.maxPrice) return;
+        const url = offerUrl(offer.link, this.marker);
+        if (!url) return;
+        deals.push({
+          provider: this.id,
+          providerDealId: `tp-${route.origin}-${route.destination}-${datePart(departureDate)}-${Math.round(offer.price as number)}-${offerIndex}`.slice(0, 255),
+          origin,
+          destination,
+          departureDate,
+          returnDate,
+          tripType: params.tripType,
+          price: offer.price as number,
+          currency,
+          airline: offer.airline?.trim() || "Aviasales",
+          flightNumber: offer.flight_number?.trim(),
+          stops: Math.max(0, Math.round(offer.transfers ?? 0)),
+          durationMinutes: Math.max(1, Math.round(offer.duration ?? 1)),
+          cabinClass: params.cabinClass ?? "economy",
+          bookingUrl: url.toString(),
+          expiresAt: new Date(Date.now() + 24 * 3_600_000).toISOString(),
+          metadata: { source: "travelpayouts-data-api", showToAffiliates: true },
+        });
+      });
+    });
+    return deals.slice(0, params.limit ?? deals.length);
+  }
+
+  async searchDeals(params: DealSearchParams): Promise<readonly NormalizedFlightDeal[]> {
+    return this.fetchDeals(params);
   }
 
   async getBookingRequestForDeal(deal: BookingDeal): Promise<ProviderBookingRequest> {

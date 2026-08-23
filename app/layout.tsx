@@ -15,7 +15,7 @@ const manrope = Manrope({
   display: "swap",
 });
 
-const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://www.urway.site";
 
 export const metadata: Metadata = {
   metadataBase: new URL(appUrl),
@@ -51,6 +51,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <head>
         <script
           id="travelpayouts-affiliate-attribution"
+          {...{ nowprocket: "" }}
           data-noptimize="1"
           data-cfasync="false"
           data-wpfc-render="false"

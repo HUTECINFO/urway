@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Manrope } from "next/font/google";
-import Script from "next/script";
 import "./globals.css";
 import { SmoothScroll } from "@/components/ui/smooth-scroll";
 
@@ -50,16 +49,23 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="es">
       <head>
-        <Script
+        <script
           id="travelpayouts-affiliate-attribution"
-          src="https://emrldco.com/NTY1NDgx.js?t=565481"
-          strategy="beforeInteractive"
           data-noptimize="1"
           data-cfasync="false"
           data-wpfc-render="false"
           seraph-accel-crit="1"
           data-no-defer="1"
           data-cmp-ab="2"
+          dangerouslySetInnerHTML={{
+            __html: `(function () {
+  var script = document.createElement("script");
+  script.async = 1;
+  script.setAttribute("data-cmp-ab", "2");
+  script.src = "https://emrldco.com/NTY1NDgx.js?t=565481";
+  document.head.appendChild(script);
+})();`,
+          }}
         />
       </head>
       <body className={`${inter.variable} ${manrope.variable} antialiased`}>

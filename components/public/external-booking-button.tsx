@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { clsx } from "clsx";
 
@@ -19,7 +18,7 @@ export function ExternalBookingButton({
 }: ExternalBookingButtonProps) {
   const href = `/go/${encodeURIComponent(dealId)}?source=urway-public&placement=${placement}`;
   return (
-    <Link
+    <a
       href={href}
       target="_blank"
       rel="nofollow sponsored noopener"
@@ -35,6 +34,6 @@ export function ExternalBookingButton({
     >
       Ir a la tarifa
       <ArrowUpRight aria-hidden="true" className={compact ? "size-3.5" : "size-4"} />
-    </Link>
+    </a>
   );
 }

@@ -38,6 +38,7 @@ interface SerpBookingOption {
   together?: {
     airline?: boolean;
     book_with?: string;
+    price?: number;
     booking_request?: SerpBookingRequest;
   };
 }
@@ -53,6 +54,7 @@ export interface ProviderBookingRequest {
   url: string;
   postData?: string;
   bookWith?: string;
+  price?: number;
 }
 
 export interface BookingLookup {
@@ -71,6 +73,7 @@ export interface SerpApiProviderOptions {
   fallbackProvider?: FlightDealProvider;
   endpoint?: string;
   fetch?: typeof fetch;
+  requestTimeoutMs?: number;
 }
 
 const environmentApiKey = (): string | undefined => {
@@ -137,13 +140,27 @@ export function isSerpApiBookingToken(value: string): boolean {
   return token.length >= 32 && token.length <= 2_048 && !token.startsWith("serpapi:");
 }
 
-const extractBookingRequest = (data: SerpApiResponse): ProviderBookingRequest | null => {
+const extractBookingRequest = (data: SerpApiResponse, targetPrice?: number): ProviderBookingRequest | null => {
   const options = (data.booking_options ?? [])
     .map((option) => option.together)
     .filter((option): option is NonNullable<SerpBookingOption["together"]> => Boolean(option?.booking_request));
-  const option = options.find((item) => item.airline) ?? options[0];
+  const option = [...options].sort((left, right) => {
+    const leftDistance = targetPrice !== undefined && Number.isFinite(left.price)
+      ? Math.abs((left.price as number) - targetPrice)
+      : Number.MAX_SAFE_INTEGER;
+    const rightDistance = targetPrice !== undefined && Number.isFinite(right.price)
+      ? Math.abs((right.price as number) - targetPrice)
+      : Number.MAX_SAFE_INTEGER;
+    if (leftDistance !== rightDistance) return leftDistance - rightDistance;
+    return Number(Boolean(right.airline)) - Number(Boolean(left.airline));
+  })[0];
   const request = option?.booking_request;
   if (!request?.url) return null;
+  if (
+    targetPrice !== undefined
+    && Number.isFinite(option.price)
+    && Math.abs((option.price as number) - targetPrice) > Math.max(500, targetPrice * 0.05)
+  ) return null;
 
   try {
     const url = new URL(request.url);
@@ -152,15 +169,20 @@ const extractBookingRequest = (data: SerpApiResponse): ProviderBookingRequest | 
       url: url.toString(),
       ...(request.post_data?.trim() && { postData: request.post_data.trim() }),
       ...(option.book_with?.trim() && { bookWith: option.book_with.trim() }),
+      ...(Number.isFinite(option.price) && { price: option.price }),
     };
   } catch {
     return null;
   }
 };
 
-const bookingTokenFrom = (data: SerpApiResponse): string | null => {
+const bookingTokenFrom = (data: SerpApiResponse, targetPrice?: number): string | null => {
   const offers = [...(data.best_flights ?? []), ...(data.other_flights ?? [])];
-  const token = offers
+  const token = [...offers]
+    .sort((left, right) => targetPrice === undefined
+      ? 0
+      : Math.abs((left.price ?? Number.MAX_SAFE_INTEGER) - targetPrice)
+        - Math.abs((right.price ?? Number.MAX_SAFE_INTEGER) - targetPrice))
     .map((offer) => offer.booking_token?.trim())
     .find((value) => value && isSerpApiBookingToken(value));
   return token ?? null;
@@ -189,11 +211,22 @@ const queryForLookup = (lookup: BookingLookup): URLSearchParams => {
 };
 
 const matchesFlightNumber = (offer: SerpFlightOffer, flightNumber: string | undefined): boolean => {
-  if (!flightNumber) return true;
+  if (!flightNumber) return false;
   const expected = flightNumber.replaceAll(/\s+/g, "").toUpperCase();
   return (offer.flights ?? []).some(
     (leg) => leg.flight_number?.replaceAll(/\s+/g, "").toUpperCase() === expected,
   );
+};
+
+const normalizeAirline = (value: string | undefined): string => value
+  ?.normalize("NFD")
+  .replaceAll(/[\u0300-\u036f]/g, "")
+  .trim()
+  .toLowerCase() ?? "";
+
+const matchesAirline = (offer: SerpFlightOffer, airline: string): boolean => {
+  const expected = normalizeAirline(airline);
+  return Boolean(expected) && (offer.flights ?? []).some((leg) => normalizeAirline(leg.airline) === expected);
 };
 
 export class SerpApiProvider implements FlightDealProvider {
@@ -204,6 +237,7 @@ export class SerpApiProvider implements FlightDealProvider {
   private readonly fallbackProvider?: FlightDealProvider;
   private readonly endpoint: string;
   private readonly fetcher: typeof fetch;
+  private readonly requestTimeoutMs: number;
 
   constructor(options: SerpApiProviderOptions = {}) {
     this.apiKey = options.apiKey?.trim() || environmentApiKey();
@@ -211,6 +245,7 @@ export class SerpApiProvider implements FlightDealProvider {
     this.fallbackProvider = options.fallbackProvider;
     this.endpoint = options.endpoint ?? "https://serpapi.com/search.json";
     this.fetcher = options.fetch ?? fetch;
+    this.requestTimeoutMs = options.requestTimeoutMs ?? 5_000;
   }
 
   private async fetchTokenResponse(
@@ -226,6 +261,7 @@ export class SerpApiProvider implements FlightDealProvider {
     try {
       const response = await this.fetcher(`${this.endpoint}?${query.toString()}`, {
         headers: { Accept: "application/json" },
+        signal: AbortSignal.timeout(this.requestTimeoutMs),
       });
       if (!response.ok) return null;
       const data = (await response.json()) as SerpApiResponse;
@@ -243,6 +279,7 @@ export class SerpApiProvider implements FlightDealProvider {
     try {
       const response = await this.fetcher(`${this.endpoint}?${query.toString()}`, {
         headers: { Accept: "application/json" },
+        signal: AbortSignal.timeout(this.requestTimeoutMs),
       });
       if (!response.ok) return null;
       const data = (await response.json()) as SerpApiResponse;
@@ -252,22 +289,29 @@ export class SerpApiProvider implements FlightDealProvider {
     }
   }
 
-  async getBookingRequest(bookingToken: string, lookup: BookingLookup): Promise<ProviderBookingRequest | null> {
+  async getBookingRequest(
+    bookingToken: string,
+    lookup: BookingLookup,
+    targetPrice?: number,
+    tokenType: "booking_token" | "departure_token" = lookup.tripType === TripType.ROUND_TRIP
+      ? "departure_token"
+      : "booking_token",
+  ): Promise<ProviderBookingRequest | null> {
     if (!this.apiKey || !this.isActive || !isSerpApiBookingToken(bookingToken)) return null;
+    if (tokenType === "departure_token") {
+      const returningFlights = await this.fetchTokenResponse("departure_token", bookingToken, lookup);
+      const returnBookingToken = returningFlights ? bookingTokenFrom(returningFlights, targetPrice) : null;
+      if (!returnBookingToken) return null;
+      const bookingOptions = await this.fetchTokenResponse("booking_token", returnBookingToken, lookup);
+      return bookingOptions ? extractBookingRequest(bookingOptions, targetPrice) : null;
+    }
+
     const directResponse = await this.fetchTokenResponse("booking_token", bookingToken, lookup);
-    const directRequest = directResponse ? extractBookingRequest(directResponse) : null;
-    if (directRequest) return directRequest;
-
-    const returningFlights = await this.fetchTokenResponse("departure_token", bookingToken, lookup);
-    const returnBookingToken = returningFlights ? bookingTokenFrom(returningFlights) : null;
-    if (!returnBookingToken) return null;
-
-    const bookingOptions = await this.fetchTokenResponse("booking_token", returnBookingToken, lookup);
-    return bookingOptions ? extractBookingRequest(bookingOptions) : null;
+    return directResponse ? extractBookingRequest(directResponse, targetPrice) : null;
   }
 
-  async getBookingRequestForDeal(deal: Pick<Deal, "origin" | "destination" | "travelStartDate" | "travelEndDate" | "tripType" | "currency" | "flightNumber" | "cabinClass" | "airline">): Promise<ProviderBookingRequest | null> {
-    if (!this.apiKey || !this.isActive) return null;
+  async getBookingRequestForDeal(deal: Pick<Deal, "origin" | "destination" | "travelStartDate" | "travelEndDate" | "tripType" | "currency" | "flightNumber" | "cabinClass" | "airline" | "price" | "provider" | "providerDealId">): Promise<ProviderBookingRequest | null> {
+    if (!this.apiKey || !this.isActive || deal.provider !== this.id) return null;
     const departureTime = new Date(deal.travelStartDate).getTime();
     if (!Number.isFinite(departureTime) || departureTime < Date.now() - 4 * 3_600_000) return null;
     const cabinClass = deal.cabinClass === "premium_economy" || deal.cabinClass === "business" || deal.cabinClass === "first" || deal.cabinClass === "economy"
@@ -282,13 +326,26 @@ export class SerpApiProvider implements FlightDealProvider {
       currency: deal.currency,
       cabinClass,
     };
+
+    if (isSerpApiBookingToken(deal.providerDealId)) {
+      const storedBooking = await this.getBookingRequest(deal.providerDealId, lookup, deal.price);
+      if (storedBooking) return storedBooking;
+    }
+
     const search = await this.fetchItinerary(lookup);
     const offers = [...(search?.best_flights ?? []), ...(search?.other_flights ?? [])];
-    const selected = offers.find((offer) => matchesFlightNumber(offer, deal.flightNumber))
-      ?? offers.find((offer) => offer.flights?.[0]?.airline?.trim().toLowerCase() === deal.airline.trim().toLowerCase())
-      ?? offers[0];
+    const selected = [...offers].sort((left, right) => {
+      const score = (offer: SerpFlightOffer) =>
+        (matchesFlightNumber(offer, deal.flightNumber) ? 1_000_000 : 0)
+        + (matchesAirline(offer, deal.airline) ? 100_000 : 0)
+        - Math.abs((offer.price ?? Number.MAX_SAFE_INTEGER) - deal.price);
+      return score(right) - score(left);
+    })[0];
     const token = selected?.booking_token ?? selected?.departure_token;
-    return token && isSerpApiBookingToken(token) ? this.getBookingRequest(token, lookup) : null;
+    const tokenType = selected?.booking_token ? "booking_token" : "departure_token";
+    return token && isSerpApiBookingToken(token)
+      ? this.getBookingRequest(token, lookup, deal.price, tokenType)
+      : null;
   }
 
   async fetchDeals(params: DealSearchParams): Promise<readonly NormalizedFlightDeal[]> {
@@ -327,6 +384,7 @@ export class SerpApiProvider implements FlightDealProvider {
     try {
       response = await this.fetcher(`${this.endpoint}?${query.toString()}`, {
         headers: { Accept: "application/json" },
+        signal: AbortSignal.timeout(this.requestTimeoutMs),
       });
     } catch (error) {
       throw new ProviderRequestError(

@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { captureServerEvent } from "@/lib/analytics/posthog";
 import { getDealById, recordDealClick } from "@/lib/data/deals";
-import { getBookingFallback } from "@/lib/booking/flight-link";
-import { SerpApiProvider, type ProviderBookingRequest } from "@/lib/providers/serp-api-provider";
+import { isGoogleFlightsUrl } from "@/lib/booking/flight-link";
+import { SerpApiProvider } from "@/lib/providers/serp-api-provider";
 
 interface RouteContext {
   params: Promise<{ dealId: string }>;
@@ -26,20 +26,27 @@ function withSessionCookie(response: NextResponse, sessionId: string) {
   return response;
 }
 
-function bookingPostResponse(booking: ProviderBookingRequest, sessionId: string): NextResponse | null {
-  if (!booking.postData) return null;
-  const fields = [...new URLSearchParams(booking.postData).entries()]
-    .map(([name, value]) => `<input type="hidden" name="${escapeHtml(name)}" value="${escapeHtml(value)}">`)
-    .join("");
-  if (!fields) return null;
-
-  const providerName = escapeHtml(booking.bookWith ?? "el proveedor");
+function resolvingResponse(dealId: string, slug: string, sessionId: string): NextResponse {
+  const resolveUrl = JSON.stringify(`/go/${encodeURIComponent(dealId)}?resolve=1`);
+  const backUrl = `/drop/${escapeHtml(slug)}`;
   const response = new NextResponse(`<!doctype html>
-    <html lang="es"><head><meta charset="utf-8"><meta name="robots" content="noindex"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Abriendo tu tarifa | UR WAY</title></head>
-    <body style="margin:0;display:grid;min-height:100vh;place-items:center;background:#0d1b2a;color:#fff;font-family:Arial,sans-serif"><main style="max-width:28rem;padding:2rem;text-align:center"><p style="margin:0 0 .75rem;color:#ff7a59;font-weight:700;letter-spacing:.13em;text-transform:uppercase;font-size:.7rem">UR WAY · enlace protegido</p><h1 style="margin:0;font-size:1.8rem">Abriendo tu tarifa con ${providerName}</h1><p style="color:#c5ccd5;line-height:1.55">Te llevamos a la opción exacta que encontramos. Si no abre automáticamente, continúa con el proveedor.</p><form id="urway-booking" method="post" action="${escapeHtml(booking.url)}">${fields}<button type="submit" style="border:0;border-radius:999px;background:#ff7a59;padding:.9rem 1.25rem;font-weight:700;color:#0d1b2a">Continuar a ${providerName}</button></form></main><script>document.getElementById('urway-booking').submit()</script></body></html>`, {
+    <html lang="es"><head><meta charset="utf-8"><meta name="robots" content="noindex"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Buscando tu tarifa | UR WAY</title><style>@keyframes fly{0%{transform:translateX(-38px) rotate(-8deg)}50%{transform:translateX(38px) rotate(8deg)}100%{transform:translateX(-38px) rotate(-8deg)}}@keyframes pulse{0%,100%{opacity:.5}50%{opacity:1}}*{box-sizing:border-box}body{margin:0;display:grid;min-height:100vh;place-items:center;background:radial-gradient(circle at 50% 15%,#1d344a 0,#0d1b2a 52%,#08121d 100%);color:#fff;font-family:Arial,sans-serif}.card{width:min(92vw,34rem);padding:clamp(1.5rem,7vw,3rem);text-align:center;border:1px solid rgba(255,255,255,.12);border-radius:2rem;background:rgba(13,27,42,.72);box-shadow:0 28px 80px rgba(0,0,0,.28);backdrop-filter:blur(18px)}.plane{display:inline-grid;width:5rem;height:5rem;place-items:center;margin-bottom:1.25rem;border-radius:1.5rem;background:#ff7a59;color:#0d1b2a;font-size:2rem;animation:fly 2.2s cubic-bezier(.45,0,.55,1) infinite}.eyebrow{margin:0 0 .75rem;color:#ff9a80;font-size:.7rem;font-weight:800;letter-spacing:.16em;text-transform:uppercase}h1{margin:0;font-size:clamp(2rem,9vw,3.4rem);line-height:1}.status{min-height:3.2rem;color:#c5ccd5;line-height:1.6;animation:pulse 1.8s ease-in-out infinite}.track{height:.35rem;margin:1.5rem 0;overflow:hidden;border-radius:99px;background:rgba(255,255,255,.1)}.track:after{display:block;width:45%;height:100%;border-radius:inherit;background:#ff7a59;content:"";animation:fly 1.6s ease-in-out infinite}.back{display:none;color:#fff;text-underline-offset:4px}</style></head>
+    <body><main class="card"><div class="plane" aria-hidden="true">✈</div><p class="eyebrow">UR WAY · conexión segura</p><h1 id="title">Buscando tu tarifa exacta</h1><p class="status" id="status">Estamos confirmando la ruta y el precio directamente con el proveedor.</p><div class="track" id="track"></div><a class="back" id="back" href="${backUrl}">Volver al Drop</a></main><script>(()=>{const status=document.getElementById('status'),title=document.getElementById('title'),track=document.getElementById('track'),back=document.getElementById('back');const messages=['Revisando disponibilidad en tiempo real…','Comparando las opciones del mismo vuelo…','Preparando el acceso al checkout…'];let index=0;const ticker=setInterval(()=>{status.textContent=messages[Math.min(index++,messages.length-1)]},3500);const fail=()=>{clearInterval(ticker);title.textContent='La tarifa acaba de moverse';status.textContent='El proveedor ya no devuelve el precio publicado. No te enviaremos a una búsqueda genérica.';status.style.animation='none';track.style.display='none';back.style.display='inline'};fetch(${resolveUrl},{headers:{accept:'application/json'},credentials:'same-origin'}).then(async response=>{const payload=await response.json();if(!response.ok||!payload.url)throw new Error('unavailable');clearInterval(ticker);const amount=Number.isFinite(payload.price)?' por '+new Intl.NumberFormat('es-MX',{style:'currency',currency:'MXN',maximumFractionDigits:0}).format(payload.price):'';status.textContent='Listo. Abriendo '+(payload.bookWith||'el proveedor')+amount+'…';if(payload.postData){const form=document.createElement('form');form.method='post';form.action=payload.url;for(const [name,value] of new URLSearchParams(payload.postData)){const input=document.createElement('input');input.type='hidden';input.name=name;input.value=value;form.appendChild(input)}document.body.appendChild(form);form.submit();return}window.location.replace(payload.url)}).catch(fail)})()</script></body></html>`, {
     headers: { "content-type": "text/html; charset=utf-8", "cache-control": "no-store" },
   });
   return withSessionCookie(response, sessionId);
+}
+
+async function within<T>(promise: Promise<T>, timeoutMs: number, fallback: T): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race([
+      promise,
+      new Promise<T>((resolve) => { timer = setTimeout(() => resolve(fallback), timeoutMs); }),
+    ]);
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
 }
 
 export async function GET(request: NextRequest, { params }: RouteContext) {
@@ -50,7 +57,29 @@ export async function GET(request: NextRequest, { params }: RouteContext) {
   try {
     const deal = await getDealById(dealId);
     if (!deal) throw new Error("Drop no encontrado o no publicado");
-    const destination = await recordDealClick({
+    const storedDestination = new URL(deal.bookingUrl);
+
+    if (url.searchParams.get("resolve") === "1") {
+      const booking = await within(
+        new SerpApiProvider({ requestTimeoutMs: 7_000 }).getBookingRequestForDeal(deal),
+        28_000,
+        null,
+      );
+      if (booking) {
+        return NextResponse.json({
+          url: booking.url,
+          postData: booking.postData,
+          bookWith: booking.bookWith,
+          price: booking.price,
+        }, { headers: { "cache-control": "no-store" } });
+      }
+      if (deal.provider !== "serpapi" && !isGoogleFlightsUrl(storedDestination)) {
+        return NextResponse.json({ url: storedDestination.toString() }, { headers: { "cache-control": "no-store" } });
+      }
+      return NextResponse.json({ error: "fare-unavailable" }, { status: 410, headers: { "cache-control": "no-store" } });
+    }
+
+    void recordDealClick({
       dealId,
       sessionId,
       source: url.searchParams.get("source"),
@@ -58,22 +87,22 @@ export async function GET(request: NextRequest, { params }: RouteContext) {
       utmSource: url.searchParams.get("utm_source"),
       utmMedium: url.searchParams.get("utm_medium"),
       utmCampaign: url.searchParams.get("utm_campaign"),
-    });
-    captureServerEvent("deal_click_out", {
-      distinct_id: sessionId,
-      deal_id: dealId,
-      source: url.searchParams.get("source"),
-    });
-
-    const booking = await new SerpApiProvider().getBookingRequestForDeal(deal);
-    if (booking) {
-      const postResponse = bookingPostResponse(booking, sessionId);
-      if (postResponse) return postResponse;
-      return withSessionCookie(NextResponse.redirect(booking.url, 307), sessionId);
+    }).catch(() => undefined);
+    try {
+      captureServerEvent("deal_click_out", {
+        distinct_id: sessionId,
+        deal_id: dealId,
+        source: url.searchParams.get("source"),
+      });
+    } catch {
+      // Analytics must never block the booking handoff.
     }
 
-    return withSessionCookie(NextResponse.redirect(getBookingFallback(deal, destination), 307), sessionId);
+    return resolvingResponse(deal.id, deal.slug, sessionId);
   } catch {
+    if (url.searchParams.get("resolve") === "1") {
+      return NextResponse.json({ error: "fare-unavailable" }, { status: 410, headers: { "cache-control": "no-store" } });
+    }
     return NextResponse.redirect(new URL("/?error=drop-unavailable", request.url), 303);
   }
 }

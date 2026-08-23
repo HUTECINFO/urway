@@ -220,11 +220,15 @@ export async function listPublishedDeals(originCode?: string): Promise<Deal[]> {
   const client = await dbClient();
   if (!client) {
     return [...getDemoStore().deals.values()]
-      .filter((deal) => deal.status === DealStatus.PUBLISHED && (!originCode || deal.origin.code === originCode))
+      .filter((deal) => deal.status === DealStatus.PUBLISHED && deal.provider !== "mock" && (!originCode || deal.origin.code === originCode))
       .sort((left, right) => right.score.total - left.score.total);
   }
 
-  let query = client.from("deals").select(dealSelection).eq("status", DealStatus.PUBLISHED);
+  let query = client
+    .from("deals")
+    .select(dealSelection)
+    .eq("status", DealStatus.PUBLISHED)
+    .neq("provider", "mock");
   if (originCode) query = query.eq("origin.iata", originCode);
   const { data, error } = await query.order("published_at", { ascending: false });
   if (error) throw new Error(`No se pudieron cargar los Drops: ${error.message}`);
@@ -244,12 +248,12 @@ export async function getDealBySlug(slug: string, includeUnpublished = false): P
   const client = await dbClient(includeUnpublished);
   if (!client) {
     return [...getDemoStore().deals.values()].find(
-      (deal) => deal.slug === slug && (includeUnpublished || deal.status === DealStatus.PUBLISHED),
+      (deal) => deal.slug === slug && (includeUnpublished || (deal.status === DealStatus.PUBLISHED && deal.provider !== "mock")),
     ) ?? null;
   }
 
   let query = client.from("deals").select(dealSelection).eq("slug", slug);
-  if (!includeUnpublished) query = query.eq("status", DealStatus.PUBLISHED);
+  if (!includeUnpublished) query = query.eq("status", DealStatus.PUBLISHED).neq("provider", "mock");
   const { data, error } = await query.maybeSingle();
   if (error) throw new Error(`No se pudo cargar el Drop: ${error.message}`);
   return data ? mapDbDeal(data as unknown as DbDealRow) : null;
@@ -259,11 +263,11 @@ export async function getDealById(id: string, includeUnpublished = false): Promi
   const client = await dbClient(includeUnpublished);
   if (!client) {
     const deal = getDemoStore().deals.get(id);
-    return deal && (includeUnpublished || deal.status === DealStatus.PUBLISHED) ? deal : null;
+    return deal && (includeUnpublished || (deal.status === DealStatus.PUBLISHED && deal.provider !== "mock")) ? deal : null;
   }
 
   let query = client.from("deals").select(dealSelection).eq("id", id);
-  if (!includeUnpublished) query = query.eq("status", DealStatus.PUBLISHED);
+  if (!includeUnpublished) query = query.eq("status", DealStatus.PUBLISHED).neq("provider", "mock");
   const { data, error } = await query.maybeSingle();
   if (error) throw new Error(`No se pudo cargar el Drop: ${error.message}`);
   return data ? mapDbDeal(data as unknown as DbDealRow) : null;

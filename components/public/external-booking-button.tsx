@@ -30,9 +30,9 @@ export function ExternalBookingButton({
         compact ? "px-4 py-2.5 text-xs" : "min-h-13 px-6 py-3.5 text-sm",
         className,
       )}
-      aria-label="Abrir esta tarifa con el proveedor en una nueva pestaña"
+      aria-label="Comparar esta tarifa entre agencias en una nueva pestaña"
     >
-      Ir a la tarifa
+      Comparar agencias
       <ArrowUpRight aria-hidden="true" className={compact ? "size-3.5" : "size-4"} />
     </a>
   );

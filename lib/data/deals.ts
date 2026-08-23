@@ -530,7 +530,10 @@ export async function saveDiscoveredDeals(deals: readonly Deal[]) {
     row.origin_airport_id = ids.get(deals[index].origin.code) ?? null;
   });
   if (rows.some((row) => !row.origin_airport_id)) throw new Error("Falta un aeropuerto de origen en Supabase");
-  const { data, error } = await client.from("deals").upsert(rows, { onConflict: "fingerprint", ignoreDuplicates: true }).select("id");
+  const { data, error } = await client
+    .from("deals")
+    .upsert(rows, { onConflict: "provider,provider_reference", ignoreDuplicates: true })
+    .select("id");
   if (error) throw new Error(`No se pudieron guardar candidatos: ${error.message}`);
   return data?.length ?? 0;
 }

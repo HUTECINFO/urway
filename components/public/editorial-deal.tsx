@@ -17,8 +17,8 @@ export function EditorialDeal({ deal, index }: EditorialDealProps) {
   const reverse = index % 2 === 1;
 
   return (
-    <article className="grid overflow-hidden rounded-[2.5rem] bg-white shadow-[0_24px_90px_rgba(13,27,42,0.08)] lg:min-h-[38rem] lg:grid-cols-2">
-      <div className={`relative min-h-[28rem] overflow-hidden bg-sand ${reverse ? "lg:order-2" : ""}`}>
+    <article className="grid overflow-hidden rounded-[1.75rem] bg-white shadow-[0_24px_90px_rgba(13,27,42,0.08)] sm:rounded-[2.5rem] lg:min-h-[38rem] lg:grid-cols-2">
+      <div className={`relative min-h-[20rem] overflow-hidden bg-sand sm:min-h-[28rem] ${reverse ? "lg:order-2" : ""}`}>
         <Image
           src={deal.imageUrl}
           alt={`${deal.destination.city}, ${deal.destination.country}`}
@@ -36,21 +36,21 @@ export function EditorialDeal({ deal, index }: EditorialDealProps) {
         </div>
       </div>
 
-      <div className={`flex flex-col justify-between p-7 sm:p-10 lg:p-12 ${reverse ? "lg:order-1" : ""}`}>
+      <div className={`flex flex-col justify-between p-6 sm:p-10 lg:p-12 ${reverse ? "lg:order-1" : ""}`}>
         <div>
           <p className="text-xs font-extrabold uppercase tracking-[0.17em] text-coral">{deal.origin.city} <span className="mx-2 text-midnight/25">→</span> {deal.destination.country}</p>
-          <h3 className="mt-5 text-balance font-display text-[clamp(3.2rem,7vw,6.5rem)] font-extrabold leading-[0.82] tracking-[-0.08em] text-midnight">{deal.destination.city}</h3>
-          <p className="mt-6 max-w-xl text-lg leading-8 text-slate">{deal.shortCopy}</p>
+          <h3 className="mt-4 text-balance font-display text-[clamp(2.75rem,12vw,6.5rem)] font-extrabold leading-[0.86] tracking-[-0.07em] text-midnight sm:mt-5 sm:leading-[0.82] sm:tracking-[-0.08em]">{deal.destination.city}</h3>
+          <p className="mt-4 max-w-xl text-base leading-7 text-slate sm:mt-6 sm:text-lg sm:leading-8">{deal.shortCopy}</p>
           <dl className="mt-8 grid gap-3 border-y border-midnight/8 py-5 text-sm text-slate sm:grid-cols-2">
             <div className="flex items-center gap-2.5"><CalendarDays aria-hidden="true" className="size-4 text-coral" /><dt className="sr-only">Fechas</dt><dd>{formatDateRange(deal)} · {deal.durationDays} días</dd></div>
             <div className="flex items-center gap-2.5"><Plane aria-hidden="true" className="size-4 text-coral" /><dt className="sr-only">Vuelo</dt><dd>{deal.airline} · {formatStops(deal.stops)}</dd></div>
           </dl>
         </div>
-        <div className="mt-9 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+        <div className="mt-7 flex flex-col gap-5 sm:mt-9 sm:flex-row sm:items-end sm:justify-between">
           <PriceBlock price={deal.price} normalPrice={deal.normalPrice} savingsPercentage={deal.savingsPercentage} currency={deal.currency} />
-          <div className="flex flex-wrap gap-2">
-            <Link href={`/drop/${deal.slug}`} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl border border-midnight/12 px-4 text-sm font-extrabold text-midnight transition hover:border-midnight hover:bg-midnight hover:text-white">Ver detalles <ArrowRight aria-hidden="true" className="size-4" /></Link>
-            <ExternalBookingButton dealId={deal.id} placement="hero" className="rounded-2xl" />
+          <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
+            <Link href={`/drop/${deal.slug}`} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl border border-midnight/12 px-3 text-sm font-extrabold text-midnight transition hover:border-midnight hover:bg-midnight hover:text-white sm:px-4">Ver detalles <ArrowRight aria-hidden="true" className="size-4" /></Link>
+            <ExternalBookingButton dealId={deal.id} placement="hero" className="rounded-2xl px-3 sm:px-6" />
           </div>
         </div>
       </div>

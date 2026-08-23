@@ -43,6 +43,33 @@ body {
   font-family: var(--font-inter), Arial, Helvetica, sans-serif;
 }
 
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis:not(.lenis-autoToggle).lenis-stopped {
+  overflow: clip;
+}
+
+.lenis [data-lenis-prevent],
+.lenis [data-lenis-prevent-wheel],
+.lenis [data-lenis-prevent-touch],
+.lenis [data-lenis-prevent-vertical],
+.lenis [data-lenis-prevent-horizontal] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-smooth iframe {
+  pointer-events: none;
+}
+
+.lenis.lenis-autoToggle {
+  transition-duration: 1ms;
+  transition-property: overflow;
+  transition-behavior: allow-discrete;
+}
+
 ::selection {
   background: #bce3ff;
   color: var(--midnight);
@@ -65,7 +92,7 @@ textarea:focus-visible {
 }
 
 @utility container-page {
-  width: min(100% - 2rem, 76rem);
+  width: min(100% - 2.5rem, 76rem);
   margin-inline: auto;
 }
 
@@ -77,20 +104,138 @@ textarea:focus-visible {
   box-shadow: 0 18px 60px rgba(13, 27, 42, 0.08);
 }
 
+.dynamic-shell {
+  width: min(calc(100vw - 2.5rem), 68rem);
+  margin-inline: auto;
+  transition: width 640ms cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: width;
+}
+
+.dynamic-shell.is-flight {
+  width: 6.25rem;
+}
+
 .dynamic-island {
+  min-height: 4rem;
+  border-radius: 1.4rem;
   transform-origin: top center;
-  contain: layout paint;
+  contain: paint;
+  transition:
+    min-height 640ms cubic-bezier(0.16, 1, 0.3, 1),
+    border-radius 640ms cubic-bezier(0.16, 1, 0.3, 1),
+    background-color 420ms ease,
+    border-color 420ms ease,
+    box-shadow 520ms ease;
+  will-change: min-height, border-radius;
+}
+
+.dynamic-shell.is-flight .dynamic-island {
+  min-height: 4.25rem;
+  border-radius: 1.5rem;
+}
+
+.island-surface {
+  opacity: 1;
+  transform: scale(1);
+  transform-origin: top center;
+  transition:
+    opacity 180ms ease 140ms,
+    transform 520ms cubic-bezier(0.16, 1, 0.3, 1) 90ms;
+  will-change: opacity, transform;
+}
+
+.island-surface.is-hidden {
+  pointer-events: none;
+  opacity: 0;
+  transform: scale(0.94);
+  transition-delay: 0ms;
 }
 
 .hero-image {
   animation: hero-breathe 1200ms ease-out both;
 }
 
+.hero-grain {
+  background-image:
+    radial-gradient(rgba(255, 255, 255, 0.2) 0.55px, transparent 0.7px),
+    radial-gradient(rgba(13, 27, 42, 0.2) 0.6px, transparent 0.75px);
+  background-position: 0 0, 6px 8px;
+  background-size: 9px 9px, 11px 11px;
+  mix-blend-mode: soft-light;
+  pointer-events: none;
+}
+
+.hero-title-accent {
+  color: var(--coral);
+  text-shadow: 0 12px 45px rgba(255, 122, 89, 0.18);
+}
+
+.hero-origin-card {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    0 20px 60px rgba(4, 13, 22, 0.2);
+}
+
+.hero-ticket::before,
+.hero-ticket::after {
+  position: absolute;
+  z-index: 3;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 999px;
+  background: #142334;
+  content: "";
+}
+
+.hero-ticket::before {
+  bottom: 4.75rem;
+  left: -0.5rem;
+}
+
+.hero-ticket::after {
+  right: -0.5rem;
+  bottom: 4.75rem;
+}
+
+.hero-route-line::before,
+.hero-route-line::after {
+  position: absolute;
+  top: 50%;
+  width: 0.42rem;
+  height: 0.42rem;
+  border: 1px solid rgba(13, 27, 42, 0.6);
+  border-radius: 999px;
+  background: #f7f4ed;
+  content: "";
+  transform: translateY(-50%);
+}
+
+.hero-route-line::before { left: -0.1rem; }
+.hero-route-line::after { right: -0.1rem; }
+
+.hero-ticket-action {
+  position: relative;
+}
+
+@media (min-width: 640px) {
+  .hero-ticket::before {
+    bottom: -0.5rem;
+    left: auto;
+    right: 17.5rem;
+  }
+
+  .hero-ticket::after {
+    top: -0.5rem;
+    right: 17.5rem;
+    bottom: auto;
+  }
+}
+
 .flight-heading {
   display: inline-flex;
   position: relative;
   z-index: 2;
-  transition: transform 240ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition: transform 440ms cubic-bezier(0.16, 1, 0.3, 1);
   will-change: transform;
 }
 
@@ -107,10 +252,27 @@ textarea:focus-visible {
   filter: drop-shadow(0 5px 8px rgba(255, 122, 89, 0.22));
 }
 
+.flight-control {
+  pointer-events: none;
+  opacity: 0;
+  transform: scale(0.52);
+  transition:
+    opacity 180ms ease,
+    transform 520ms cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+
+.flight-control.is-visible {
+  pointer-events: auto;
+  opacity: 1;
+  transform: scale(1);
+  transition-delay: 130ms, 80ms;
+}
+
 .flight-wind-field {
   position: absolute;
   inset: 0;
-  transition: transform 240ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition: transform 440ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .flight-wind-field--up {
@@ -170,11 +332,35 @@ textarea:focus-visible {
   50% { opacity: 1; transform: scale(1.05); }
 }
 
+@media (max-width: 639px) {
+  .dynamic-shell {
+    width: calc(100vw - 1rem);
+  }
+
+  .dynamic-shell.is-flight {
+    width: 5.75rem;
+  }
+
+  .dynamic-shell.is-flight .dynamic-island {
+    min-height: 4rem;
+    border-radius: 1.35rem;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   .hero-image,
   .flight-control::after,
   .flight-wind {
     animation: none;
+  }
+
+  .dynamic-shell,
+  .dynamic-island,
+  .island-surface,
+  .flight-control,
+  .flight-heading,
+  .flight-wind-field {
+    transition-duration: 1ms;
   }
 }

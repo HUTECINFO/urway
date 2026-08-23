@@ -48,7 +48,7 @@ export function PublicHeader() {
     const updateFlight = () => {
       const nextScrollY = Math.max(0, window.scrollY);
       const delta = nextScrollY - lastScrollY.current;
-      setFlightMode(nextScrollY > 88);
+      setFlightMode((current) => current ? nextScrollY > 56 : nextScrollY > 112);
       if (Math.abs(delta) > 3) setScrollDirection(delta > 0 ? "down" : "up");
       lastScrollY.current = nextScrollY;
       animationFrame.current = null;
@@ -78,10 +78,10 @@ export function PublicHeader() {
   const isFlying = flightMode && !open;
 
   return (
-    <header className="pointer-events-none fixed inset-x-0 top-0 z-50 px-3 pt-3 sm:px-5 sm:pt-5">
-      <div className="relative mx-auto max-w-[68rem]">
-        <div className={`flight-pod pointer-events-auto absolute left-1/2 top-0 w-[6.25rem] -translate-x-1/2 transition-[opacity,transform] duration-200 ease-out ${isFlying ? "scale-100 opacity-100" : "pointer-events-none scale-75 opacity-0"}`} aria-hidden={!isFlying}>
-          <button type="button" onClick={() => setOpen(true)} tabIndex={isFlying ? 0 : -1} className="flight-control relative flex h-[4.25rem] w-full items-center justify-center overflow-hidden rounded-[1.5rem] border border-white/15 bg-midnight text-coral shadow-[0_14px_42px_rgba(13,27,42,.24)]" aria-label={`Abrir navegación. Volando hacia ${scrollDirection === "down" ? "abajo" : "arriba"}`}>
+    <header className="pointer-events-none fixed inset-x-0 top-0 z-50 pt-2.5 sm:pt-5">
+      <div className={`dynamic-shell pointer-events-auto ${isFlying ? "is-flight" : ""} ${open ? "is-open" : ""}`}>
+        <div className={`dynamic-island relative overflow-hidden border ${isFlying || open ? "border-white/12 bg-midnight text-white shadow-[0_20px_60px_rgba(13,27,42,.24)]" : "border-white/45 bg-white/94 shadow-[0_10px_36px_rgba(13,27,42,.11)] backdrop-blur-md"}`}>
+          <button type="button" onClick={() => setOpen(true)} tabIndex={isFlying ? 0 : -1} className={`flight-control absolute inset-0 z-20 flex items-center justify-center overflow-hidden text-coral ${isFlying ? "is-visible" : ""}`} aria-hidden={!isFlying} aria-label={`Abrir navegación. Volando hacia ${scrollDirection === "down" ? "abajo" : "arriba"}`}>
             <span aria-hidden="true" className={`flight-wind-field flight-wind-field--${scrollDirection}`}>
               {Array.from({ length: 7 }, (_, index) => <i className={`flight-wind flight-wind--${index + 1}`} key={index} />)}
             </span>
@@ -89,37 +89,40 @@ export function PublicHeader() {
               <span className="flight-craft"><Plane className="size-8" strokeWidth={1.75} /></span>
             </span>
           </button>
-        </div>
 
-        <div className={`dynamic-island pointer-events-auto overflow-hidden rounded-[1.4rem] border transition-[opacity,transform,background-color,border-color,box-shadow] duration-200 ease-out ${isFlying ? "pointer-events-none -translate-y-2 scale-[.97] opacity-0" : "translate-y-0 scale-100 opacity-100"} ${open ? "border-white/12 bg-midnight text-white shadow-[0_24px_70px_rgba(13,27,42,0.22)]" : "border-white/45 bg-white/94 shadow-[0_10px_36px_rgba(13,27,42,0.11)] backdrop-blur-md"}`}>
-          <div className="flex min-h-16 items-center gap-3 px-3 sm:px-4">
-            <div className={open ? "[&_a_span_span]:text-white" : ""}><Logo inverse={open} compact /></div>
-            <span className={`hidden h-5 w-px sm:block ${open ? "bg-white/20" : "bg-midnight/12"}`} />
-            <span className={`mr-auto hidden text-[11px] font-bold uppercase tracking-[0.14em] sm:block ${open ? "text-white/45" : "text-slate"}`} aria-live="polite">{section}</span>
-            <nav className="hidden items-center gap-1 lg:flex" aria-label="Navegación principal">
-              <Link href="/drops" onClick={closeMenu} className={`rounded-xl px-3 py-2 text-sm font-semibold transition ${open ? "text-white/60 hover:bg-white/10 hover:text-white" : "text-midnight/65 hover:bg-midnight/5 hover:text-midnight"}`}>Ver rutas</Link>
-              <Link href="/como-funciona" onClick={closeMenu} className={`rounded-xl px-3 py-2 text-sm font-semibold transition ${open ? "text-white/60 hover:bg-white/10 hover:text-white" : "text-midnight/65 hover:bg-midnight/5 hover:text-midnight"}`}>Nuestro criterio</Link>
-            </nav>
-            <Link href="/#newsletter" onClick={closeMenu} className={`hidden min-h-11 items-center gap-2 rounded-xl px-4 text-sm font-extrabold transition sm:inline-flex ${open ? "bg-coral text-midnight hover:bg-white" : "bg-midnight text-white hover:bg-coral hover:text-midnight"}`}>
-              <Bell aria-hidden="true" className="size-4" /> Recibir avisos
-            </Link>
-            <button type="button" onClick={() => setOpen((current) => !current)} className={`inline-flex size-11 items-center justify-center rounded-xl transition ${open ? "bg-white text-midnight hover:bg-coral" : "bg-sand text-midnight hover:bg-coral"}`} aria-expanded={open} aria-controls="island-menu" aria-label={open ? "Cerrar menú" : "Abrir menú"}>
-              {open ? <X aria-hidden="true" className="size-5" /> : <Menu aria-hidden="true" className="size-5" />}
-            </button>
-          </div>
+          <div className={`island-surface ${isFlying ? "is-hidden" : ""}`}>
+            <div className="flex min-h-16 items-center gap-2.5 px-2.5 sm:gap-3 sm:px-4">
+              <div className={open ? "[&_a_span_span]:text-white" : ""}><Logo inverse={open} compact /></div>
+              <span className={`hidden h-5 w-px min-[390px]:block ${open ? "bg-white/20" : "bg-midnight/12"}`} />
+              <span className={`mr-auto hidden max-w-24 truncate text-[9px] font-bold uppercase tracking-[0.12em] min-[390px]:block md:max-w-none md:text-[11px] md:tracking-[0.14em] ${open ? "text-white/45" : "text-slate"}`} aria-live="polite">{section}</span>
+              <nav className="hidden items-center gap-1 lg:flex" aria-label="Navegación principal">
+                <Link href="/drops" onClick={closeMenu} className={`rounded-xl px-3 py-2 text-sm font-semibold transition ${open ? "text-white/60 hover:bg-white/10 hover:text-white" : "text-midnight/65 hover:bg-midnight/5 hover:text-midnight"}`}>Ver rutas</Link>
+                <Link href="/como-funciona" onClick={closeMenu} className={`rounded-xl px-3 py-2 text-sm font-semibold transition ${open ? "text-white/60 hover:bg-white/10 hover:text-white" : "text-midnight/65 hover:bg-midnight/5 hover:text-midnight"}`}>Nuestro criterio</Link>
+              </nav>
+              <Link href="/#newsletter" onClick={closeMenu} className={`hidden min-h-11 items-center gap-2 rounded-xl px-4 text-sm font-extrabold transition sm:inline-flex ${open ? "bg-coral text-midnight hover:bg-white" : "bg-midnight text-white hover:bg-coral hover:text-midnight"}`}>
+                <Bell aria-hidden="true" className="size-4" /> Recibir avisos
+              </Link>
+              <Link href="/#newsletter" onClick={closeMenu} className={`inline-flex size-11 items-center justify-center rounded-xl transition sm:hidden ${open ? "bg-coral text-midnight" : "bg-midnight text-white"}`} aria-label="Recibir avisos">
+                <Bell aria-hidden="true" className="size-4" />
+              </Link>
+              <button type="button" onClick={() => setOpen((current) => !current)} className={`inline-flex size-11 items-center justify-center rounded-xl transition ${open ? "bg-white text-midnight hover:bg-coral" : "bg-sand text-midnight hover:bg-coral"}`} aria-expanded={open} aria-controls="island-menu" aria-label={open ? "Cerrar menú" : "Abrir menú"}>
+                {open ? <X aria-hidden="true" className="size-5" /> : <Menu aria-hidden="true" className="size-5" />}
+              </button>
+            </div>
 
-          <div id="island-menu" className={`grid transition-[grid-template-rows,opacity] duration-250 ease-[cubic-bezier(.2,.8,.2,1)] ${open ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"}`} aria-hidden={!open}>
-            <div className="min-h-0 overflow-hidden">
-              <div className="grid gap-8 border-t border-white/12 px-5 pb-6 pt-7 sm:px-8 sm:pb-8 lg:grid-cols-[1fr_0.8fr] lg:items-end">
-                <nav className="grid gap-1" aria-label="Menú expandido">
-                  <Link href="/" onClick={closeMenu} tabIndex={open ? 0 : -1} className="group flex items-center justify-between rounded-2xl px-3 py-2 font-display text-[clamp(1.65rem,4vw,3.2rem)] font-extrabold tracking-[-0.06em] text-white/60 transition hover:bg-white/5 hover:text-white">Explora <span className="text-base text-coral transition group-hover:translate-x-1">01</span></Link>
-                  <Link href="/drops" onClick={closeMenu} tabIndex={open ? 0 : -1} className="group flex items-center justify-between rounded-2xl px-3 py-2 font-display text-[clamp(1.65rem,4vw,3.2rem)] font-extrabold tracking-[-0.06em] text-white/60 transition hover:bg-white/5 hover:text-white">Ver rutas <span className="text-base text-coral transition group-hover:translate-x-1">02</span></Link>
-                  <Link href="/como-funciona" onClick={closeMenu} tabIndex={open ? 0 : -1} className="group flex items-center justify-between rounded-2xl px-3 py-2 font-display text-[clamp(1.65rem,4vw,3.2rem)] font-extrabold tracking-[-0.06em] text-white/60 transition hover:bg-white/5 hover:text-white">Nuestro criterio <span className="text-base text-coral transition group-hover:translate-x-1">03</span></Link>
-                </nav>
-                <div className="rounded-2xl bg-white/8 p-5">
-                  <p className="text-xs font-bold uppercase tracking-[0.16em] text-coral">Una sola señal</p>
-                  <p className="mt-3 max-w-sm font-display text-2xl font-bold leading-tight tracking-[-0.04em]">Todo lo importante en un mismo lugar: precio, ruta y contexto.</p>
-                  <Link href="/#newsletter" onClick={closeMenu} tabIndex={open ? 0 : -1} className="mt-6 inline-flex items-center gap-2 text-sm font-extrabold text-white">Recibir el próximo aviso <ArrowDown aria-hidden="true" className="size-4" /></Link>
+            <div id="island-menu" className={`grid transition-[grid-template-rows,opacity] duration-500 ease-[cubic-bezier(.16,1,.3,1)] ${open ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"}`} aria-hidden={!open}>
+              <div className="min-h-0 overflow-y-auto overscroll-contain">
+                <div className="grid max-h-[calc(100svh-5.5rem)] gap-6 border-t border-white/12 px-4 pb-5 pt-5 sm:gap-8 sm:px-8 sm:pb-8 sm:pt-7 lg:grid-cols-[1fr_0.8fr] lg:items-end">
+                  <nav className="grid gap-1" aria-label="Menú expandido">
+                    <Link href="/" onClick={closeMenu} tabIndex={open ? 0 : -1} className="group flex items-center justify-between rounded-2xl px-3 py-2 font-display text-[clamp(1.65rem,8vw,3.2rem)] font-extrabold tracking-[-0.06em] text-white/60 transition hover:bg-white/5 hover:text-white">Explora <span className="text-sm text-coral transition group-hover:translate-x-1 sm:text-base">01</span></Link>
+                    <Link href="/drops" onClick={closeMenu} tabIndex={open ? 0 : -1} className="group flex items-center justify-between rounded-2xl px-3 py-2 font-display text-[clamp(1.65rem,8vw,3.2rem)] font-extrabold tracking-[-0.06em] text-white/60 transition hover:bg-white/5 hover:text-white">Ver rutas <span className="text-sm text-coral transition group-hover:translate-x-1 sm:text-base">02</span></Link>
+                    <Link href="/como-funciona" onClick={closeMenu} tabIndex={open ? 0 : -1} className="group flex items-center justify-between rounded-2xl px-3 py-2 font-display text-[clamp(1.65rem,8vw,3.2rem)] font-extrabold tracking-[-0.06em] text-white/60 transition hover:bg-white/5 hover:text-white">Nuestro criterio <span className="text-sm text-coral transition group-hover:translate-x-1 sm:text-base">03</span></Link>
+                  </nav>
+                  <div className="rounded-2xl bg-white/8 p-4 sm:p-5">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-coral sm:text-xs">Una sola señal</p>
+                    <p className="mt-3 max-w-sm font-display text-xl font-bold leading-tight tracking-[-0.04em] sm:text-2xl">Todo lo importante en un mismo lugar: precio, ruta y contexto.</p>
+                    <Link href="/#newsletter" onClick={closeMenu} tabIndex={open ? 0 : -1} className="mt-5 inline-flex items-center gap-2 text-sm font-extrabold text-white sm:mt-6">Recibir el próximo aviso <ArrowDown aria-hidden="true" className="size-4" /></Link>
+                  </div>
                 </div>
               </div>
             </div>

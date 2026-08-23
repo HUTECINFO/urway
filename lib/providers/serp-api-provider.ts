@@ -1,5 +1,5 @@
 import { getAirport } from "../demo/airports";
-import { TripType, type Airport } from "../domain/types";
+import { TripType, type Airport, type Deal } from "../domain/types";
 import {
   ProviderConfigurationError,
   ProviderRequestError,
@@ -29,10 +29,40 @@ interface SerpFlightOffer {
   departure_token?: string;
 }
 
+interface SerpBookingRequest {
+  url?: string;
+  post_data?: string;
+}
+
+interface SerpBookingOption {
+  together?: {
+    airline?: boolean;
+    book_with?: string;
+    booking_request?: SerpBookingRequest;
+  };
+}
+
 interface SerpApiResponse {
   error?: string;
   best_flights?: SerpFlightOffer[];
   other_flights?: SerpFlightOffer[];
+  booking_options?: SerpBookingOption[];
+}
+
+export interface ProviderBookingRequest {
+  url: string;
+  postData?: string;
+  bookWith?: string;
+}
+
+export interface BookingLookup {
+  origin: string;
+  destination: string;
+  departureDate: string;
+  returnDate?: string;
+  tripType: TripType;
+  currency: string;
+  cabinClass?: "economy" | "premium_economy" | "business" | "first";
 }
 
 export interface SerpApiProviderOptions {
@@ -102,6 +132,70 @@ const providerReferenceFor = (
   return token ?? `serpapi:${origin.code}:${destination.code}:${departureDate.slice(0, 10)}:${index}`;
 };
 
+export function isSerpApiBookingToken(value: string): boolean {
+  const token = value.trim();
+  return token.length >= 32 && token.length <= 2_048 && !token.startsWith("serpapi:");
+}
+
+const extractBookingRequest = (data: SerpApiResponse): ProviderBookingRequest | null => {
+  const options = (data.booking_options ?? [])
+    .map((option) => option.together)
+    .filter((option): option is NonNullable<SerpBookingOption["together"]> => Boolean(option?.booking_request));
+  const option = options.find((item) => item.airline) ?? options[0];
+  const request = option?.booking_request;
+  if (!request?.url) return null;
+
+  try {
+    const url = new URL(request.url);
+    if (url.protocol !== "https:") return null;
+    return {
+      url: url.toString(),
+      ...(request.post_data?.trim() && { postData: request.post_data.trim() }),
+      ...(option.book_with?.trim() && { bookWith: option.book_with.trim() }),
+    };
+  } catch {
+    return null;
+  }
+};
+
+const bookingTokenFrom = (data: SerpApiResponse): string | null => {
+  const offers = [...(data.best_flights ?? []), ...(data.other_flights ?? [])];
+  const token = offers
+    .map((offer) => offer.booking_token?.trim())
+    .find((value) => value && isSerpApiBookingToken(value));
+  return token ?? null;
+};
+
+const travelClassCode = (cabinClass: BookingLookup["cabinClass"]): string => String(
+  { economy: 1, premium_economy: 2, business: 3, first: 4 }[cabinClass ?? "economy"],
+);
+
+const queryForLookup = (lookup: BookingLookup): URLSearchParams => {
+  const query = new URLSearchParams({
+    departure_id: lookup.origin,
+    arrival_id: lookup.destination,
+    outbound_date: lookup.departureDate.slice(0, 10),
+    type: lookup.tripType === TripType.ONE_WAY ? "2" : "1",
+    currency: lookup.currency.trim().toUpperCase() || "MXN",
+    adults: "1",
+    travel_class: travelClassCode(lookup.cabinClass),
+    hl: "es",
+    gl: "mx",
+  });
+  if (lookup.tripType !== TripType.ONE_WAY && lookup.returnDate) {
+    query.set("return_date", lookup.returnDate.slice(0, 10));
+  }
+  return query;
+};
+
+const matchesFlightNumber = (offer: SerpFlightOffer, flightNumber: string | undefined): boolean => {
+  if (!flightNumber) return true;
+  const expected = flightNumber.replaceAll(/\s+/g, "").toUpperCase();
+  return (offer.flights ?? []).some(
+    (leg) => leg.flight_number?.replaceAll(/\s+/g, "").toUpperCase() === expected,
+  );
+};
+
 export class SerpApiProvider implements FlightDealProvider {
   readonly id = "serpapi";
   readonly name = "SerpAPI Google Flights";
@@ -117,6 +211,84 @@ export class SerpApiProvider implements FlightDealProvider {
     this.fallbackProvider = options.fallbackProvider;
     this.endpoint = options.endpoint ?? "https://serpapi.com/search.json";
     this.fetcher = options.fetch ?? fetch;
+  }
+
+  private async fetchTokenResponse(
+    tokenType: "booking_token" | "departure_token",
+    token: string,
+    lookup: BookingLookup,
+  ): Promise<SerpApiResponse | null> {
+    const query = queryForLookup(lookup);
+    query.set("engine", "google_flights");
+    query.set("api_key", this.apiKey!);
+    query.set(tokenType, token);
+
+    try {
+      const response = await this.fetcher(`${this.endpoint}?${query.toString()}`, {
+        headers: { Accept: "application/json" },
+      });
+      if (!response.ok) return null;
+      const data = (await response.json()) as SerpApiResponse;
+      return data.error ? null : data;
+    } catch {
+      return null;
+    }
+  }
+
+  private async fetchItinerary(lookup: BookingLookup): Promise<SerpApiResponse | null> {
+    const query = queryForLookup(lookup);
+    query.set("engine", "google_flights");
+    query.set("api_key", this.apiKey!);
+
+    try {
+      const response = await this.fetcher(`${this.endpoint}?${query.toString()}`, {
+        headers: { Accept: "application/json" },
+      });
+      if (!response.ok) return null;
+      const data = (await response.json()) as SerpApiResponse;
+      return data.error ? null : data;
+    } catch {
+      return null;
+    }
+  }
+
+  async getBookingRequest(bookingToken: string, lookup: BookingLookup): Promise<ProviderBookingRequest | null> {
+    if (!this.apiKey || !this.isActive || !isSerpApiBookingToken(bookingToken)) return null;
+    const directResponse = await this.fetchTokenResponse("booking_token", bookingToken, lookup);
+    const directRequest = directResponse ? extractBookingRequest(directResponse) : null;
+    if (directRequest) return directRequest;
+
+    const returningFlights = await this.fetchTokenResponse("departure_token", bookingToken, lookup);
+    const returnBookingToken = returningFlights ? bookingTokenFrom(returningFlights) : null;
+    if (!returnBookingToken) return null;
+
+    const bookingOptions = await this.fetchTokenResponse("booking_token", returnBookingToken, lookup);
+    return bookingOptions ? extractBookingRequest(bookingOptions) : null;
+  }
+
+  async getBookingRequestForDeal(deal: Pick<Deal, "origin" | "destination" | "travelStartDate" | "travelEndDate" | "tripType" | "currency" | "flightNumber" | "cabinClass" | "airline">): Promise<ProviderBookingRequest | null> {
+    if (!this.apiKey || !this.isActive) return null;
+    const departureTime = new Date(deal.travelStartDate).getTime();
+    if (!Number.isFinite(departureTime) || departureTime < Date.now() - 4 * 3_600_000) return null;
+    const cabinClass = deal.cabinClass === "premium_economy" || deal.cabinClass === "business" || deal.cabinClass === "first" || deal.cabinClass === "economy"
+      ? deal.cabinClass
+      : "economy";
+    const lookup: BookingLookup = {
+      origin: deal.origin.code,
+      destination: deal.destination.code,
+      departureDate: deal.travelStartDate,
+      returnDate: deal.tripType === TripType.ROUND_TRIP ? deal.travelEndDate : undefined,
+      tripType: deal.tripType,
+      currency: deal.currency,
+      cabinClass,
+    };
+    const search = await this.fetchItinerary(lookup);
+    const offers = [...(search?.best_flights ?? []), ...(search?.other_flights ?? [])];
+    const selected = offers.find((offer) => matchesFlightNumber(offer, deal.flightNumber))
+      ?? offers.find((offer) => offer.flights?.[0]?.airline?.trim().toLowerCase() === deal.airline.trim().toLowerCase())
+      ?? offers[0];
+    const token = selected?.booking_token ?? selected?.departure_token;
+    return token && isSerpApiBookingToken(token) ? this.getBookingRequest(token, lookup) : null;
   }
 
   async fetchDeals(params: DealSearchParams): Promise<readonly NormalizedFlightDeal[]> {

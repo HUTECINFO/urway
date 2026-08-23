@@ -51,7 +51,7 @@ export function DealCard({ deal, priority = false }: DealCardProps) {
             <dd>{deal.airline} · {formatStops(deal.stops)}</dd>
           </div>
         </dl>
-        <div className="mt-auto flex items-end justify-between gap-3 pt-5">
+        <div className="mt-auto flex flex-col items-stretch gap-4 pt-5 min-[380px]:flex-row min-[380px]:items-end min-[380px]:justify-between min-[380px]:gap-3">
           <PriceBlock price={deal.price} normalPrice={deal.normalPrice} savingsPercentage={deal.savingsPercentage} currency={deal.currency} />
           <ExternalBookingButton dealId={deal.id} placement="card" compact className="shrink-0" />
         </div>

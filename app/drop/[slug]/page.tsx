@@ -84,13 +84,13 @@ export default async function DropPage({ params }: DropPageProps) {
       <PublicHeader />
       <main>
         <DealViewTracker dealId={deal.id} />
-        <section className="bg-sand pb-14 pt-28 sm:pb-20 sm:pt-32">
+        <section className="bg-sand pb-12 pt-24 sm:pb-20 sm:pt-32">
           <div className="container-page">
-            <Link href="/drops" className="mb-7 inline-flex items-center gap-2 text-sm font-bold text-slate transition hover:text-midnight">
+            <Link href="/drops" className="mb-5 inline-flex items-center gap-2 text-sm font-bold text-slate transition hover:text-midnight sm:mb-7">
               <ArrowLeft aria-hidden="true" className="size-4" /> Volver a las rutas
             </Link>
-            <div className="grid overflow-hidden rounded-[2.75rem] bg-midnight shadow-[0_28px_90px_rgba(13,27,42,.16)] lg:grid-cols-[1.08fr_0.92fr]">
-              <div className="relative min-h-[23rem] sm:min-h-[32rem] lg:min-h-[41rem]">
+            <div className="grid overflow-hidden rounded-[1.75rem] bg-midnight shadow-[0_28px_90px_rgba(13,27,42,.16)] sm:rounded-[2.75rem] lg:grid-cols-[1.08fr_0.92fr]">
+              <div className="relative min-h-[20rem] sm:min-h-[32rem] lg:min-h-[41rem]">
                 <Image
                   src={deal.imageUrl}
                   alt={`Vista de ${deal.destination.city}, ${deal.destination.country}`}
@@ -101,19 +101,19 @@ export default async function DropPage({ params }: DropPageProps) {
                 />
                 <div className="absolute left-5 top-5 sm:left-7 sm:top-7"><DealBadge type={deal.dealType} /></div>
               </div>
-              <div className="relative flex flex-col justify-center overflow-hidden p-7 text-white sm:p-10 lg:p-12">
+              <div className="relative flex flex-col justify-center overflow-hidden p-6 text-white sm:p-10 lg:p-12">
                 <Image src="/brand/urway-mark.png" alt="" width={380} height={380} className="pointer-events-none absolute -bottom-24 -right-24 w-80 rotate-[-8deg] opacity-[0.055]" />
                 <div className="relative">
-                <div className="flex flex-wrap items-center gap-3">
+                <div className="flex flex-col items-start gap-2 min-[390px]:flex-row min-[390px]:flex-wrap min-[390px]:items-center min-[390px]:gap-3">
                   <DealScore score={deal.score} inverse />
                   <span className="rounded-full border border-white/15 px-3 py-2 text-xs font-bold text-white/65">Actualizado {dateTime.format(new Date(deal.verifiedAt))}</span>
                 </div>
-                <p className="mt-8 text-xs font-extrabold uppercase tracking-[0.16em] text-coral">{deal.origin.city} · {deal.origin.code} <span aria-hidden="true">→</span> {deal.destination.code}</p>
-                <h1 className="mt-3 text-balance font-display text-4xl font-extrabold leading-[0.95] tracking-[-0.065em] sm:text-6xl">{deal.title}</h1>
-                <p className="mt-5 text-lg leading-8 text-white/65">{deal.shortCopy}</p>
-                <div className="mt-8 border-t border-white/12 pt-7">
+                <p className="mt-6 text-[10px] font-extrabold uppercase tracking-[0.16em] text-coral sm:mt-8 sm:text-xs">{deal.origin.city} · {deal.origin.code} <span aria-hidden="true">→</span> {deal.destination.code}</p>
+                <h1 className="mt-3 text-pretty font-display text-[2.35rem] font-extrabold leading-[0.98] tracking-[-0.06em] sm:text-6xl sm:leading-[0.95] sm:tracking-[-0.065em]">{deal.title}</h1>
+                <p className="mt-4 text-base leading-7 text-white/65 sm:mt-5 sm:text-lg sm:leading-8">{deal.shortCopy}</p>
+                <div className="mt-6 border-t border-white/12 pt-6 sm:mt-8 sm:pt-7">
                   <PriceBlock price={deal.price} normalPrice={deal.normalPrice} savingsPercentage={deal.savingsPercentage} currency={deal.currency} inverse large />
-                  <ExternalBookingButton dealId={deal.id} placement="hero" className="mt-6 w-full bg-white text-midnight hover:bg-sand sm:w-auto" />
+                  <ExternalBookingButton dealId={deal.id} placement="hero" tone="light" className="mt-6 w-full sm:w-auto" />
                   <p className="mt-3 text-xs leading-5 text-white/45">El precio final se confirma con el proveedor. Abriremos una nueva pestaña para que puedas revisar y reservar.</p>
                 </div>
                 </div>
@@ -122,45 +122,45 @@ export default async function DropPage({ params }: DropPageProps) {
           </div>
         </section>
 
-        <section className="py-20 sm:py-28">
-          <div className="container-page grid gap-12 lg:grid-cols-[1fr_22rem] lg:items-start lg:gap-16">
+        <section className="py-16 sm:py-28">
+          <div className="container-page grid gap-10 sm:gap-12 lg:grid-cols-[1fr_22rem] lg:items-start lg:gap-16">
             <div>
               <section aria-labelledby="about-title">
                 <p className="text-xs font-extrabold uppercase tracking-[0.16em] text-coral">La lectura de UR WAY</p>
-                <h2 id="about-title" className="mt-2 font-display text-3xl font-extrabold tracking-[-0.05em] sm:text-4xl">Por qué esta ruta sí conviene</h2>
-                <p className="mt-5 max-w-3xl text-lg leading-8 text-slate">{deal.description}</p>
+                <h2 id="about-title" className="mt-2 font-display text-[1.9rem] font-extrabold leading-tight tracking-[-0.05em] sm:text-4xl">Por qué esta ruta sí conviene</h2>
+                <p className="mt-4 max-w-3xl text-base leading-7 text-slate sm:mt-5 sm:text-lg sm:leading-8">{deal.description}</p>
                 <div className="mt-6 flex flex-wrap gap-2">
                   {deal.tags.map((tag) => <span key={tag} className="rounded-full bg-sand px-3 py-2 text-xs font-bold text-midnight">{tag}</span>)}
                 </div>
               </section>
 
-              <section className="mt-14" aria-labelledby="details-title">
+              <section className="mt-12 sm:mt-14" aria-labelledby="details-title">
                 <div className="flex items-end justify-between gap-4 border-b border-midnight/10 pb-5">
                   <div>
                     <p className="text-xs font-extrabold uppercase tracking-[0.16em] text-coral">Itinerario</p>
-                    <h2 id="details-title" className="mt-2 font-display text-3xl font-extrabold tracking-[-0.05em]">Los detalles</h2>
+                    <h2 id="details-title" className="mt-2 font-display text-[1.9rem] font-extrabold tracking-[-0.05em] sm:text-3xl">Los detalles</h2>
                   </div>
                   <span className="hidden text-sm font-bold text-slate sm:block">{deal.tripType === TripType.ROUND_TRIP ? "Viaje redondo" : "Solo ida"}</span>
                 </div>
                 <dl className="divide-y divide-midnight/8">
                   {detailItems.map(({ icon: Icon, label, value }) => (
-                    <div key={label} className="grid gap-3 py-5 sm:grid-cols-[13rem_1fr]">
+                    <div key={label} className="grid gap-2 py-4 sm:grid-cols-[13rem_1fr] sm:gap-3 sm:py-5">
                       <dt className="flex items-center gap-2 text-sm font-extrabold text-midnight"><Icon aria-hidden="true" className="size-4 text-coral" /> {label}</dt>
                       <dd className="text-sm leading-6 text-slate">{value}</dd>
                     </div>
                   ))}
-                  <div className="grid gap-3 py-5 sm:grid-cols-[13rem_1fr]">
+                  <div className="grid gap-2 py-4 sm:grid-cols-[13rem_1fr] sm:gap-3 sm:py-5">
                     <dt className="flex items-center gap-2 text-sm font-extrabold text-midnight"><Ticket aria-hidden="true" className="size-4 text-coral" /> Ventana de fechas</dt>
                     <dd className="text-sm leading-6 text-slate">Del {formatLongDate(deal.dateWindow.start)} al {formatLongDate(deal.dateWindow.end)}{deal.dateWindow.flexible ? ". Fechas flexibles." : ". Fechas fijas."}</dd>
                   </div>
                 </dl>
               </section>
 
-              <section className="mt-14 rounded-[2rem] bg-sand p-6 sm:p-9" aria-labelledby="score-title">
+              <section className="mt-12 rounded-[1.5rem] bg-sand p-5 sm:mt-14 sm:rounded-[2rem] sm:p-9" aria-labelledby="score-title">
                 <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <p className="text-xs font-extrabold uppercase tracking-[0.16em] text-coral">La tarifa en contexto</p>
-                    <h2 id="score-title" className="mt-2 font-display text-3xl font-extrabold tracking-[-0.05em]">Score UR WAY</h2>
+                    <h2 id="score-title" className="mt-2 font-display text-[1.9rem] font-extrabold tracking-[-0.05em] sm:text-3xl">Score UR WAY</h2>
                   </div>
                   <DealScore score={deal.score} />
                 </div>
@@ -174,7 +174,7 @@ export default async function DropPage({ params }: DropPageProps) {
                 </dl>
               </section>
 
-              <aside className="mt-10 flex gap-4 rounded-2xl border border-midnight/10 p-5" aria-label="Aviso importante">
+              <aside className="mt-8 flex gap-3 rounded-2xl border border-midnight/10 p-4 sm:mt-10 sm:gap-4 sm:p-5" aria-label="Aviso importante">
                 <Info aria-hidden="true" className="mt-0.5 size-5 shrink-0 text-coral" />
                 <div>
                   <h2 className="text-sm font-extrabold text-midnight">Antes de hacer clic en reservar</h2>
@@ -183,7 +183,7 @@ export default async function DropPage({ params }: DropPageProps) {
               </aside>
             </div>
 
-            <aside className="rounded-[2rem] border border-midnight/8 bg-white p-6 card-shadow lg:sticky lg:top-24" aria-label="Resumen de reserva">
+            <aside className="rounded-[1.5rem] border border-midnight/8 bg-white p-5 card-shadow sm:rounded-[2rem] sm:p-6 lg:sticky lg:top-24" aria-label="Resumen de reserva">
               <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-coral">Lo que podrías ahorrar</p>
               <p className="mt-2 font-display text-3xl font-extrabold tracking-[-0.05em] text-midnight">{formatMoney(deal.savings, deal.currency)}</p>
               <p className="mt-1 text-sm text-slate">frente al precio habitual de {formatMoney(deal.normalPrice, deal.currency)}</p>

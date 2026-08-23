@@ -4,7 +4,7 @@ import { timingSafeEqual } from "node:crypto";
 
 export function isAuthorizedCron(request: Request) {
   const secret = process.env.CRON_SECRET;
-  if (!secret) return process.env.NODE_ENV !== "production";
+  if (!secret) return false;
 
   const provided = request.headers.get("authorization")?.replace(/^Bearer\s+/i, "") ?? "";
   const expectedBuffer = Buffer.from(secret);

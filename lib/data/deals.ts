@@ -379,7 +379,7 @@ export async function reverifyDeal(id: string): Promise<Deal> {
 }
 
 export async function recordDealView(dealId: string, sessionId: string) {
-  const client = await dbClient(true);
+  const client = await dbClient(false);
   if (!client) {
     getDemoStore().views.push({ dealId, viewedAt: new Date().toISOString() });
     return;
@@ -391,7 +391,7 @@ export async function recordDealClick(input: ClickInput) {
   const deal = await getDealById(input.dealId);
   if (!deal) throw new Error("Drop no encontrado o no publicado");
   const destination = sanitizeExternalUrl(deal.bookingUrl);
-  const client = await dbClient(true);
+  const client = await dbClient(false);
   const clickedAt = new Date().toISOString();
   if (!client) {
     const click: TrackedClick = { ...input, source: input.source ?? null, referrer: input.referrer ?? null, utmSource: input.utmSource ?? null, utmMedium: input.utmMedium ?? null, utmCampaign: input.utmCampaign ?? null, clickedAt };

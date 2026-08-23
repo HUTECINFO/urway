@@ -17,9 +17,9 @@ const escapeHtml = (value: string) => value
 function withSessionCookie(response: NextResponse, sessionId: string) {
   response.cookies.set("urway_session", sessionId, {
     httpOnly: true,
-    sameSite: "lax",
+    sameSite: "strict",
     secure: process.env.NODE_ENV === "production",
-    maxAge: 60 * 60 * 24 * 365,
+    maxAge: 60 * 60 * 24 * 30,
     path: "/",
   });
   return response;
@@ -36,10 +36,15 @@ function resolvingResponse(dealId: string, slug: string, sessionId: string): Nex
   return withSessionCookie(response, sessionId);
 }
 
+const sanitizeParam = (value: string | null): string | null =>
+  value ? value.trim().slice(0, 200) : null;
+
+const appBaseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+
 export async function GET(request: NextRequest, { params }: RouteContext) {
   const { dealId } = await params;
   const url = new URL(request.url);
-  const sessionId = request.cookies.get("urway_session")?.value ?? crypto.randomUUID();
+  const sessionId = crypto.randomUUID();
 
   try {
     const deal = await getDealById(dealId);
@@ -61,17 +66,17 @@ export async function GET(request: NextRequest, { params }: RouteContext) {
     void recordDealClick({
       dealId,
       sessionId,
-      source: url.searchParams.get("source"),
-      referrer: request.headers.get("referer"),
-      utmSource: url.searchParams.get("utm_source"),
-      utmMedium: url.searchParams.get("utm_medium"),
-      utmCampaign: url.searchParams.get("utm_campaign"),
+      source: sanitizeParam(url.searchParams.get("source")),
+      referrer: sanitizeParam(request.headers.get("referer")),
+      utmSource: sanitizeParam(url.searchParams.get("utm_source")),
+      utmMedium: sanitizeParam(url.searchParams.get("utm_medium")),
+      utmCampaign: sanitizeParam(url.searchParams.get("utm_campaign")),
     }).catch(() => undefined);
     try {
       captureServerEvent("deal_click_out", {
         distinct_id: sessionId,
         deal_id: dealId,
-        source: url.searchParams.get("source"),
+        source: sanitizeParam(url.searchParams.get("source")) ?? null,
       });
     } catch {
       // Analytics must never block the booking handoff.
@@ -82,6 +87,6 @@ export async function GET(request: NextRequest, { params }: RouteContext) {
     if (url.searchParams.get("resolve") === "1") {
       return NextResponse.json({ error: "fare-unavailable" }, { status: 410, headers: { "cache-control": "no-store" } });
     }
-    return NextResponse.redirect(new URL("/?error=drop-unavailable", request.url), 303);
+    return NextResponse.redirect(new URL("/?error=drop-unavailable", appBaseUrl), 303);
   }
 }

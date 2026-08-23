@@ -3,6 +3,7 @@ import { captureServerEvent } from "@/lib/analytics/posthog";
 import { getDealById, recordDealClick } from "@/lib/data/deals";
 import { isGoogleFlightsUrl } from "@/lib/booking/flight-link";
 import { SerpApiProvider } from "@/lib/providers/serp-api-provider";
+import { TravelpayoutsProvider } from "@/lib/providers/travelpayouts-provider";
 
 interface RouteContext {
   params: Promise<{ dealId: string }>;
@@ -60,11 +61,14 @@ export async function GET(request: NextRequest, { params }: RouteContext) {
     const storedDestination = new URL(deal.bookingUrl);
 
     if (url.searchParams.get("resolve") === "1") {
-      const booking = await within(
-        new SerpApiProvider({ requestTimeoutMs: 7_000 }).getBookingRequestForDeal(deal),
-        28_000,
+      const travelpayoutsPromise = new TravelpayoutsProvider({ requestTimeoutMs: 6_000 })
+        .getBookingRequestForDeal(deal);
+      const serpBooking = await within(
+        new SerpApiProvider({ requestTimeoutMs: 5_000 }).getBookingRequestForDeal(deal),
+        12_000,
         null,
       );
+      const booking = serpBooking ?? await travelpayoutsPromise;
       if (booking) {
         return NextResponse.json({
           url: booking.url,

@@ -50,6 +50,8 @@ npm run build
 ## Integraciones
 
 - `SERPAPI_KEY`: activa el adapter de SerpApi en discovery.
+- `TRAVELPAYOUTS_API_TOKEN`: consulta precios y enlaces vigentes de Aviasales desde el servidor.
+- `TRAVELPAYOUTS_MARKER`: Partner ID opcional para atribuir los enlaces de Aviasales a tu cuenta.
 - `CRON_SECRET`: protege los endpoints `/api/cron/*` en producción.
 - `NEXT_PUBLIC_POSTHOG_KEY`: habilita la estructura de eventos.
 - `RESEND_API_KEY`: habilita el cliente transaccional preparado.

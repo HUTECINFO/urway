@@ -50,7 +50,6 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="es">
       <head>
         <script
-          id="travelpayouts-affiliate-attribution"
           {...{ nowprocket: "" }}
           data-noptimize="1"
           data-cfasync="false"
@@ -59,13 +58,14 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           data-no-defer="1"
           data-cmp-ab="2"
           dangerouslySetInnerHTML={{
-            __html: `(function () {
-  var script = document.createElement("script");
-  script.async = 1;
-  script.setAttribute("data-cmp-ab", "2");
-  script.src = "https://emrldco.com/NTY1NDgx.js?t=565481";
-  document.head.appendChild(script);
-})();`,
+            __html: `
+  (function () {
+      var script = document.createElement("script");
+      script.async = 1;
+      script.setAttribute("data-cmp-ab","2");
+      script.src = 'https://emrldco.com/NTY1NDgx.js?t=565481';
+      document.head.appendChild(script);
+  })();`,
           }}
         />
       </head>

@@ -23,6 +23,21 @@ export const DEMO_AIRPORTS = [
   { code: "FCO", name: "Aeropuerto de Roma-Fiumicino", city: "Roma", country: "Italia", countryCode: "IT", latitude: 41.8003, longitude: 12.2389, timezone: "Europe/Rome" },
   { code: "SJO", name: "Aeropuerto Internacional Juan Santamaría", city: "San José", country: "Costa Rica", countryCode: "CR", latitude: 9.9982, longitude: -84.2041, timezone: "America/Costa_Rica" },
   { code: "HAV", name: "Aeropuerto Internacional José Martí", city: "La Habana", country: "Cuba", countryCode: "CU", latitude: 22.9892, longitude: -82.4091, timezone: "America/Havana" },
+  { code: "LHR", name: "Aeropuerto de Londres-Heathrow", city: "Londres", country: "Reino Unido", countryCode: "GB", latitude: 51.47, longitude: -0.4543, timezone: "Europe/London" },
+  { code: "LIS", name: "Aeropuerto Humberto Delgado", city: "Lisboa", country: "Portugal", countryCode: "PT", latitude: 38.7742, longitude: -9.1342, timezone: "Europe/Lisbon" },
+  { code: "IST", name: "Aeropuerto de Estambul", city: "Estambul", country: "Turquía", countryCode: "TR", latitude: 41.2753, longitude: 28.7519, timezone: "Europe/Istanbul" },
+  { code: "ATH", name: "Aeropuerto Internacional de Atenas", city: "Atenas", country: "Grecia", countryCode: "GR", latitude: 37.9364, longitude: 23.9445, timezone: "Europe/Athens" },
+  { code: "DUB", name: "Aeropuerto de Dublín", city: "Dublín", country: "Irlanda", countryCode: "IE", latitude: 53.4213, longitude: -6.2701, timezone: "Europe/Dublin" },
+  { code: "DXB", name: "Aeropuerto Internacional de Dubái", city: "Dubái", country: "Emiratos Árabes Unidos", countryCode: "AE", latitude: 25.2532, longitude: 55.3657, timezone: "Asia/Dubai" },
+  { code: "DOH", name: "Aeropuerto Internacional Hamad", city: "Doha", country: "Catar", countryCode: "QA", latitude: 25.2731, longitude: 51.6081, timezone: "Asia/Qatar" },
+  { code: "BKK", name: "Aeropuerto Suvarnabhumi", city: "Bangkok", country: "Tailandia", countryCode: "TH", latitude: 13.69, longitude: 100.7501, timezone: "Asia/Bangkok" },
+  { code: "ICN", name: "Aeropuerto Internacional de Incheon", city: "Seúl", country: "Corea del Sur", countryCode: "KR", latitude: 37.4602, longitude: 126.4407, timezone: "Asia/Seoul" },
+  { code: "SIN", name: "Aeropuerto de Singapur-Changi", city: "Singapur", country: "Singapur", countryCode: "SG", latitude: 1.3644, longitude: 103.9915, timezone: "Asia/Singapore" },
+  { code: "SCL", name: "Aeropuerto Internacional Arturo Merino Benítez", city: "Santiago", country: "Chile", countryCode: "CL", latitude: -33.3929, longitude: -70.7858, timezone: "America/Santiago" },
+  { code: "MVD", name: "Aeropuerto Internacional de Carrasco", city: "Montevideo", country: "Uruguay", countryCode: "UY", latitude: -34.8384, longitude: -56.0308, timezone: "America/Montevideo" },
+  { code: "UIO", name: "Aeropuerto Internacional Mariscal Sucre", city: "Quito", country: "Ecuador", countryCode: "EC", latitude: -0.1254, longitude: -78.3547, timezone: "America/Guayaquil" },
+  { code: "PTY", name: "Aeropuerto Internacional de Tocumen", city: "Ciudad de Panamá", country: "Panamá", countryCode: "PA", latitude: 9.0714, longitude: -79.3835, timezone: "America/Panama" },
+  { code: "CPT", name: "Aeropuerto Internacional de Ciudad del Cabo", city: "Ciudad del Cabo", country: "Sudáfrica", countryCode: "ZA", latitude: -33.97, longitude: 18.6, timezone: "Africa/Johannesburg" },
 ] as const satisfies readonly Airport[];
 
 export const demoAirports: readonly Airport[] = DEMO_AIRPORTS;

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { captureServerEvent } from "@/lib/analytics/posthog";
 import { getDealById, recordDealClick } from "@/lib/data/deals";
 import { TravelpayoutsProvider } from "@/lib/providers/travelpayouts-provider";
+import { RATE_LIMITS, getClientKey, isRateLimited, rateLimitResponse } from "@/lib/security/rate-limit";
 
 interface RouteContext {
   params: Promise<{ dealId: string }>;
@@ -41,10 +42,19 @@ const sanitizeParam = (value: string | null): string | null =>
 
 const appBaseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
+const ID_PATTERN = /^[a-zA-Z0-9_-]{1,100}$/;
+
 export async function GET(request: NextRequest, { params }: RouteContext) {
   const { dealId } = await params;
+  if (!ID_PATTERN.test(dealId)) {
+    return NextResponse.redirect(new URL("/?error=drop-unavailable", appBaseUrl), 303);
+  }
   const url = new URL(request.url);
   const sessionId = crypto.randomUUID();
+
+  if (isRateLimited("deal-click", getClientKey(request), RATE_LIMITS.dealClick)) {
+    return rateLimitResponse(60);
+  }
 
   try {
     const deal = await getDealById(dealId);

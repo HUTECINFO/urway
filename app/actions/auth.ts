@@ -7,6 +7,7 @@ import { z } from "zod";
 import { demoAuthCookie } from "@/lib/auth/session";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
+import { RATE_LIMITS, isRateLimited } from "@/lib/security/rate-limit";
 
 export interface AuthActionState {
   error?: string;
@@ -16,26 +17,6 @@ const credentialsSchema = z.object({
   email: z.string().email(),
   password: z.string().min(8, "La contraseña debe tener al menos 8 caracteres."),
 });
-
-const loginAttempts = new Map<string, { count: number; resetAt: number }>();
-const MAX_ATTEMPTS = 5;
-const WINDOW_MS = 15 * 60 * 1000;
-
-function checkRateLimit(identifier: string): boolean {
-  const now = Date.now();
-  const entry = loginAttempts.get(identifier);
-  if (!entry || now > entry.resetAt) {
-    loginAttempts.set(identifier, { count: 1, resetAt: now + WINDOW_MS });
-    return true;
-  }
-  if (entry.count >= MAX_ATTEMPTS) return false;
-  entry.count += 1;
-  return true;
-}
-
-function clearRateLimit(identifier: string) {
-  loginAttempts.delete(identifier);
-}
 
 function safeCompare(a: string, b: string): boolean {
   const bufA = Buffer.from(a);
@@ -55,8 +36,13 @@ export async function loginAction(
 
   if (!parsed.success) return { error: "Revisa tu correo y contraseña." };
 
+  const honeypot = formData.get("website");
+  if (honeypot && String(honeypot).trim().length > 0) {
+    return { error: "Solicitud no válida." };
+  }
+
   const email = parsed.data.email.toLowerCase().trim();
-  if (!checkRateLimit(email)) {
+  if (isRateLimited("login", email, RATE_LIMITS.login)) {
     return { error: "Demasiados intentos. Intenta de nuevo en 15 minutos." };
   }
 
@@ -70,7 +56,6 @@ export async function loginAction(
       return { error: "Credenciales incorrectas." };
     }
 
-    clearRateLimit(email);
     const cookieStore = await cookies();
     cookieStore.set(demoAuthCookie, "authenticated", {
       httpOnly: true,
@@ -87,7 +72,6 @@ export async function loginAction(
 
   const { error } = await supabase.auth.signInWithPassword({ email, password: parsed.data.password });
   if (error) return { error: "Credenciales incorrectas." };
-  clearRateLimit(email);
   redirect("/admin");
 }
 

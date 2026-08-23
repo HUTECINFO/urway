@@ -1,13 +1,24 @@
 import { NextResponse } from "next/server";
 import { listPublishedDeals } from "@/lib/data/deals";
 import { DEMO_AIRPORTS } from "@/lib/demo/airports";
+import { RATE_LIMITS, getClientKey, isRateLimited, rateLimitResponse } from "@/lib/security/rate-limit";
 
 const publicOrigins = new Set<string>(
   DEMO_AIRPORTS.filter((airport) => airport.countryCode === "MX").map((airport) => airport.code),
 );
 
 export async function GET(request: Request) {
-  const originParam = new URL(request.url).searchParams.get("origin")?.trim().toUpperCase();
+  const clientKey = getClientKey(request);
+  if (isRateLimited("deals-api", clientKey, RATE_LIMITS.dealsApi)) {
+    return rateLimitResponse(60);
+  }
+
+  const url = new URL(request.url);
+  if (url.searchParams.toString().length > 500) {
+    return NextResponse.json({ ok: false, message: "Solicitud no válida." }, { status: 414 });
+  }
+
+  const originParam = url.searchParams.get("origin")?.trim().toUpperCase();
   if (originParam && !publicOrigins.has(originParam)) {
     return NextResponse.json({ ok: false, message: "El aeropuerto de salida no es válido." }, { status: 400 });
   }

@@ -11,6 +11,14 @@ export function LoginForm({ showDemoCredentials }: { showDemoCredentials: boolea
 
   return (
     <form action={formAction} className="space-y-5">
+      <input
+        type="text"
+        name="website"
+        tabIndex={-1}
+        autoComplete="off"
+        aria-hidden="true"
+        className="absolute left-[-9999px] top-[-9999px] h-0 w-0 opacity-0"
+      />
       <div className="space-y-2">
         <label htmlFor="email" className="text-xs font-bold uppercase tracking-[0.16em] text-slate">
           Correo electrónico
@@ -41,7 +49,7 @@ export function LoginForm({ showDemoCredentials }: { showDemoCredentials: boolea
             type="password"
             autoComplete="current-password"
             required
-            minLength={6}
+            minLength={8}
             defaultValue={showDemoCredentials ? "urway-demo" : undefined}
             className="h-13 w-full rounded-2xl border border-midnight/10 bg-white pl-12 pr-4 text-sm text-midnight transition placeholder:text-slate/60 hover:border-midnight/20 focus:border-sky"
             placeholder="Tu contraseña"

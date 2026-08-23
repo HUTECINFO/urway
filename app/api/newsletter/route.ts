@@ -1,43 +1,16 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { subscribeToNewsletter } from "@/lib/data/deals";
+import { RATE_LIMITS, getClientKey, isRateLimited, rateLimitResponse } from "@/lib/security/rate-limit";
 
 const requestSchema = z.object({
   email: z.string().trim().min(1).email().max(254),
   source: z.enum(["website", "footer", "modal", "landing"]).optional().default("website"),
 });
 
-const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000;
-const RATE_LIMIT_MAX = 5;
-const attempts = new Map<string, { count: number; resetAt: number }>();
-
-function getClientKey(request: Request) {
-  const forwarded = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
-  return forwarded || request.headers.get("x-real-ip") || "unknown";
-}
-
-function isRateLimited(key: string) {
-  const now = Date.now();
-  const current = attempts.get(key);
-  if (!current || current.resetAt <= now) {
-    attempts.set(key, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
-    return false;
-  }
-  current.count += 1;
-  if (attempts.size > 500) {
-    for (const [entryKey, entry] of attempts) {
-      if (entry.resetAt <= now) attempts.delete(entryKey);
-    }
-  }
-  return current.count > RATE_LIMIT_MAX;
-}
-
 export async function POST(request: Request) {
-  if (isRateLimited(getClientKey(request))) {
-    return NextResponse.json(
-      { ok: false, message: "Hiciste varios intentos. Espera unos minutos y vuelve a probar." },
-      { status: 429, headers: { "Retry-After": "900" } },
-    );
+  if (isRateLimited("newsletter", getClientKey(request), RATE_LIMITS.newsletter)) {
+    return rateLimitResponse(900, "Hiciste varios intentos. Espera unos minutos y vuelve a probar.");
   }
 
   const contentLength = Number(request.headers.get("content-length") ?? 0);

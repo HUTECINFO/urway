@@ -49,12 +49,11 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="es">
-      <body className={`${inter.variable} ${manrope.variable} antialiased`}>
-        <SmoothScroll>{children}</SmoothScroll>
+      <head>
         <Script
           id="travelpayouts-affiliate-attribution"
           src="https://emrldco.com/NTY1NDgx.js?t=565481"
-          strategy="afterInteractive"
+          strategy="beforeInteractive"
           data-noptimize="1"
           data-cfasync="false"
           data-wpfc-render="false"
@@ -62,6 +61,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           data-no-defer="1"
           data-cmp-ab="2"
         />
+      </head>
+      <body className={`${inter.variable} ${manrope.variable} antialiased`}>
+        <SmoothScroll>{children}</SmoothScroll>
       </body>
     </html>
   );

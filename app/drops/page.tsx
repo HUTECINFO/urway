@@ -10,7 +10,7 @@ import { PublicFooter } from "@/components/public/public-footer";
 import { PublicHeader } from "@/components/public/public-header";
 import { listPublishedDeals } from "@/lib/data/deals";
 import { DEMO_AIRPORTS } from "@/lib/demo/airports";
-import { DealType } from "@/lib/domain/types";
+import { DealType, type Deal } from "@/lib/domain/types";
 
 export const metadata: Metadata = {
   title: "Rutas seleccionadas",
@@ -24,6 +24,20 @@ interface DropsPageProps {
 
 const mexicoAirports = DEMO_AIRPORTS.filter((airport) => airport.countryCode === "MX");
 const dealTypes = Object.values(DealType);
+const monthFormatter = new Intl.DateTimeFormat("es-MX", { month: "long", year: "numeric", timeZone: "UTC" });
+
+function groupByMonth(deals: readonly Deal[]) {
+  const groups = new Map<string, Deal[]>();
+  deals.forEach((deal) => {
+    const key = deal.travelStartDate.slice(0, 7);
+    groups.set(key, [...(groups.get(key) ?? []), deal]);
+  });
+  return [...groups.entries()].map(([key, monthDeals]) => ({
+    key,
+    label: monthFormatter.format(new Date(`${key}-01T00:00:00.000Z`)),
+    deals: monthDeals,
+  }));
+}
 
 function filterHref(origin: string, type?: DealType) {
   const params = new URLSearchParams();
@@ -44,6 +58,8 @@ export default async function DropsPage({ searchParams }: DropsPageProps) {
       || left.price - right.price,
   );
   const deals = selectedType ? allDeals.filter((deal) => deal.dealType === selectedType) : allDeals;
+  const monthlyGroups = groupByMonth(deals);
+  const priorityIds = new Set(deals.slice(0, 3).map((deal) => deal.id));
   const selectedAirport = mexicoAirports.find((airport) => airport.code === selectedOrigin);
 
   return (
@@ -82,8 +98,18 @@ export default async function DropsPage({ searchParams }: DropsPageProps) {
             </nav>
 
             {deals.length > 0 ? (
-              <div className="mt-8 grid gap-6 sm:mt-10 sm:gap-7 md:grid-cols-2 lg:grid-cols-3">
-                {deals.map((deal, index) => <DealCard deal={deal} priority={index < 3} key={deal.id} />)}
+              <div className="mt-9 grid gap-14 sm:mt-12 sm:gap-20">
+                {monthlyGroups.map((group) => (
+                  <section key={group.key} aria-labelledby={`month-${group.key}`}>
+                    <div className="mb-6 flex items-end justify-between gap-4 border-b border-midnight/10 pb-4 sm:mb-8 sm:pb-5">
+                      <h3 id={`month-${group.key}`} className="font-display text-3xl font-extrabold capitalize tracking-[-0.055em] text-midnight sm:text-5xl">{group.label}</h3>
+                      <p className="pb-1 text-xs font-extrabold uppercase tracking-[0.15em] text-slate">{group.deals.length} {group.deals.length === 1 ? "destino" : "destinos"}</p>
+                    </div>
+                    <div className="grid gap-6 sm:gap-7 md:grid-cols-2 lg:grid-cols-3">
+                      {group.deals.map((deal) => <DealCard deal={deal} priority={priorityIds.has(deal.id)} key={deal.id} />)}
+                    </div>
+                  </section>
+                ))}
               </div>
             ) : (
               <div className="mt-8 rounded-[1.75rem] bg-white p-6 text-center shadow-[0_22px_70px_rgba(13,27,42,.07)] sm:mt-10 sm:rounded-[2.5rem] sm:p-14">

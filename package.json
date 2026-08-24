@@ -9,6 +9,7 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "media:upload": "node --env-file=.env.local scripts/upload-country-images.mjs",
+    "media:cities": "node --env-file=.env.local scripts/upload-city-images.mjs",
     "check": "npm run lint && npm run typecheck && npm run build"
   },
   "dependencies": {

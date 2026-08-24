@@ -7,7 +7,7 @@ import type {
   FlightDealProvider,
   NormalizedFlightDeal,
 } from "../providers/types";
-import { getCountryImageUrl } from "../media/country-images";
+import { getDestinationImageUrl } from "../media/country-images";
 import { createDealFingerprint, deduplicateDeals } from "./dedup";
 import { calculateDealScore, type DealScoringConfig } from "./scoring";
 import { DealStatus, DealType, TripType, type Deal } from "./types";
@@ -151,7 +151,7 @@ const toDeal = (
     bookingUrl: secureBookingUrl(normalized.bookingUrl),
     imageUrl:
       normalized.imageUrl ??
-      getCountryImageUrl(normalized.destination.countryCode),
+      getDestinationImageUrl(normalized.destination.city, normalized.destination.countryCode),
     fingerprint,
     score,
     tags: [

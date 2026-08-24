@@ -61,16 +61,30 @@ for (const countryCode of countryCodes) {
   publicUrls.set(countryCode, data.publicUrl);
 }
 
+const cityFiles = (await readdir(join(root, "public", "media", "cities")))
+  .filter((file) => file.endsWith(".webp"));
+const cityPublicUrls = new Map(cityFiles.map((file) => {
+  const slug = file.replace(/\.webp$/, "");
+  const objectPath = `cities/${file}`;
+  const { data } = client.storage.from(bucket).getPublicUrl(objectPath);
+  return [slug, data.publicUrl];
+}));
+
+const citySlug = (value) => normalize(value)
+  .replace(/[^a-z0-9]+/g, "-")
+  .replace(/^-|-$/g, "");
+
 const countryCodeFor = (airportCode, countryName) =>
   codeByAirport.get(airportCode?.toUpperCase()) ??
   countryNameCodes.get(normalize(countryName ?? ""));
 
-const updateRows = async (table, selection, airportField, countryField) => {
+const updateRows = async (table, selection, airportField, countryField, cityField) => {
   const { data: rows, error } = await client.from(table).select(selection);
   if (error) throw error;
   let updated = 0;
   for (const row of rows ?? []) {
-    const imageUrl = publicUrls.get(countryCodeFor(row[airportField], row[countryField]));
+    const imageUrl = (cityField && cityPublicUrls.get(citySlug(row[cityField])))
+      ?? publicUrls.get(countryCodeFor(row[airportField], row[countryField]));
     if (!imageUrl) continue;
     const { error: updateError } = await client.from(table)
       .update({ image_url: imageUrl }).eq("id", row.id);
@@ -81,11 +95,11 @@ const updateRows = async (table, selection, airportField, countryField) => {
 };
 
 const dealsUpdated = await updateRows(
-  "deals", "id,destination_airport_code,destination_country",
-  "destination_airport_code", "destination_country",
+  "deals", "id,destination_airport_code,destination_country,destination_city",
+  "destination_airport_code", "destination_country", "destination_city",
 );
 const destinationsUpdated = await updateRows(
-  "destinations", "id,airport_code,country", "airport_code", "country",
+  "destinations", "id,airport_code,country,city", "airport_code", "country", "city",
 );
 const { data: storedObjects, error: listError } = await client.storage
   .from(bucket).list("countries", { limit: 100, sortBy: { column: "name", order: "asc" } });

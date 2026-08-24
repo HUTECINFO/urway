@@ -166,6 +166,8 @@ textarea:focus-visible {
 }
 
 .hero-title-accent {
+  display: inline-block;
+  padding-bottom: 0.08em;
   color: var(--coral);
   text-shadow: 0 12px 45px rgba(255, 122, 89, 0.18);
 }

@@ -10,8 +10,8 @@ interface DealScoreProps {
 function getPublicScoreLabel(total: number) {
   if (total >= 90) return "Excepcional";
   if (total >= 80) return "Muy buena";
-  if (total >= 70) return "Buena oportunidad";
-  return "Tarifa analizada";
+  if (total >= 70) return "Buena oferta";
+  return "Oferta analizada";
 }
 
 export function DealScore({ score, compact = false, inverse = false }: DealScoreProps) {

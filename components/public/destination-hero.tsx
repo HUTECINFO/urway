@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowDown, ArrowRight, Plane, Radio } from "lucide-react";
+import { ArrowDown, ArrowRight, Plane } from "lucide-react";
 import { motion, useReducedMotion, useScroll, useSpring, useTransform } from "motion/react";
 import { useRef, type ReactNode } from "react";
 import type { Deal } from "@/lib/domain/types";
@@ -57,7 +57,7 @@ export function DestinationHero({ deal, children }: DestinationHeroProps) {
       >
         <motion.div {...entrance(0.05)} className="flex items-center justify-between gap-3 pt-1 sm:pt-3">
           <p className="inline-flex items-center gap-2 rounded-full border border-white/18 bg-midnight/24 px-3 py-2 text-[9px] font-extrabold uppercase tracking-[0.16em] backdrop-blur-xl sm:text-[10px]">
-            <Radio aria-hidden="true" className="size-3 text-coral" /> Señal desde México
+            Ofertas desde México
           </p>
           {deal && <DealBadge type={deal.dealType} />}
         </motion.div>
@@ -65,7 +65,7 @@ export function DestinationHero({ deal, children }: DestinationHeroProps) {
         <div className="mt-auto grid gap-4 pb-4 sm:gap-7 sm:pb-7 lg:grid-cols-[1fr_22rem] lg:items-end">
           <div>
             <motion.p {...entrance(0.12)} className="mb-3 flex items-center gap-2 text-[9px] font-extrabold uppercase tracking-[0.2em] text-coral sm:mb-4 sm:text-xs">
-              <span className="h-px w-8 bg-coral" /> No persigas precios. Sigue la señal.
+              <span className="h-px w-8 bg-coral" /> El precio correcto cambia el viaje.
             </motion.p>
             <div className="overflow-hidden pb-1">
               <motion.h1
@@ -74,11 +74,11 @@ export function DestinationHero({ deal, children }: DestinationHeroProps) {
                 transition={{ duration: 1, delay: 0.16, ease }}
                 className="max-w-5xl text-pretty font-display text-[clamp(3.25rem,15.6vw,9.7rem)] font-extrabold leading-[0.83] tracking-[-0.078em] sm:leading-[0.78] sm:tracking-[-0.085em]"
               >
-                Menos búsqueda.<br /><span className="hero-title-accent">Más mundo.</span>
+                Viaja más.<br /><span className="hero-title-accent">Paga lo justo.</span>
               </motion.h1>
             </div>
             <motion.p {...entrance(0.28)} className="mt-3 max-w-xl text-pretty text-[14px] leading-5 text-white/68 sm:mt-6 sm:text-xl sm:leading-8">
-              Encontramos el vuelo fuera de lo común y te damos el contexto para reconocerlo antes de que desaparezca.
+              Encontramos ofertas fuera de lo común desde México, revisamos cada detalle y te mostramos solo las que sí vale la pena considerar.
             </motion.p>
           </div>
 
@@ -96,7 +96,7 @@ export function DestinationHero({ deal, children }: DestinationHeroProps) {
               <div className="p-4 sm:p-6">
                 <div className="flex items-center justify-between gap-4">
                   <div>
-                    <p className="text-[9px] font-extrabold uppercase tracking-[0.18em] text-coral">Señal destacada · 01</p>
+                    <p className="text-[9px] font-extrabold uppercase tracking-[0.18em] text-coral">Oferta destacada · 01</p>
                     <p className="mt-1 text-xs font-semibold text-slate">{deal.destination.city} · {formatShortDate(deal.travelStartDate)} — {formatShortDate(deal.travelEndDate)}</p>
                   </div>
                   {deal.savingsPercentage > 0 && (
@@ -119,7 +119,7 @@ export function DestinationHero({ deal, children }: DestinationHeroProps) {
                   <p className="mt-0.5 font-display text-[1.75rem] font-extrabold tracking-[-0.055em] sm:text-3xl">{formatMoney(deal.price, deal.currency)}</p>
                 </div>
                 <Link href={`/drop/${deal.slug}`} className="group inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-coral px-4 text-xs font-extrabold text-midnight transition duration-300 hover:-translate-y-0.5 hover:bg-midnight hover:text-white sm:text-sm">
-                  Ver vuelo <ArrowRight aria-hidden="true" className="size-4 transition group-hover:translate-x-1" />
+                  Ver oferta <ArrowRight aria-hidden="true" className="size-4 transition group-hover:translate-x-1" />
                 </Link>
               </div>
             </div>

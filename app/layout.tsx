@@ -20,23 +20,23 @@ const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://www.urway.site";
 export const metadata: Metadata = {
   metadataBase: new URL(appUrl),
   title: {
-    default: "UR WAY | Vuelos que sí valen la pena",
+    default: "UR WAY | Ofertas de vuelo que sí convienen",
     template: "%s | UR WAY",
   },
-  description: "Encontramos tarifas excepcionales, revisamos la ruta y te mostramos oportunidades reales desde México.",
+  description: "Ofertas de vuelo fuera de lo común desde México, revisadas con criterio y listas para comparar.",
   applicationName: "UR WAY",
   alternates: { canonical: "/" },
   openGraph: {
     type: "website",
     locale: "es_MX",
     siteName: "UR WAY by HUTEC",
-    title: "Viaja más. Busca menos.",
-    description: "Tarifas fuera de lo común, rutas revisadas y el contexto que necesitas para decidir.",
+    title: "Vuela más. Paga lo justo.",
+    description: "Ofertas fuera de lo común, rutas revisadas y el contexto que necesitas para decidir.",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Vuelos que sí valen la pena.",
-    description: "Oportunidades de vuelo que realmente conviene revisar y reservar.",
+    title: "Ofertas de vuelo que sí convienen.",
+    description: "Rutas revisadas para que compares mejor y reserves con confianza.",
   },
 };
 

@@ -49,7 +49,7 @@ export function AirportSelector({ airports, selected = "", className = "", inver
         <span aria-hidden="true" className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-slate">▼</span>
       </div>
       <p id="origin-help" className={`mt-2 text-xs ${inverse ? "text-white/55" : "text-slate"}`} aria-live="polite">
-        {isPending ? "Buscando rutas…" : "Te mostramos oportunidades que salen desde aquí."}
+        {isPending ? "Buscando ofertas…" : "Te mostramos ofertas con salida desde aquí."}
       </p>
     </div>
   );

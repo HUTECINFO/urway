@@ -2,8 +2,8 @@ import { clsx } from "clsx";
 import { DealType } from "@/lib/domain/types";
 
 const labels: Record<DealType, string> = {
-  [DealType.TODAY]: "Oportunidad de hoy",
-  [DealType.FLASH]: "Tarifa relámpago",
+  [DealType.TODAY]: "Oferta de hoy",
+  [DealType.FLASH]: "Oferta relámpago",
   [DealType.WEEKEND]: "Fin de semana",
   [DealType.LONG_HAUL]: "Larga distancia",
   [DealType.BEACH]: "Sol y playa",

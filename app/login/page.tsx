@@ -33,7 +33,7 @@ export default async function LoginPage() {
             Menos ruido.<br />Mejores decisiones.
           </h1>
           <p className="mt-6 max-w-lg text-lg leading-8 text-white/62">
-            Detecta tarifas, revisa el contexto y publica solo las rutas que merecen llegar a portada.
+            Detecta ofertas, revisa cada detalle y publica solo las rutas que merecen llegar a portada.
           </p>
           <div className="mt-10 grid gap-3 sm:grid-cols-3">
             {features.map(({ icon: Icon, label }) => (
@@ -53,7 +53,7 @@ export default async function LoginPage() {
           <div className="mb-8">
             <p className="mb-3 text-xs font-extrabold uppercase tracking-[0.2em] text-coral">Administración</p>
             <h2 className="font-display text-4xl font-extrabold tracking-[-0.05em] text-midnight">Bienvenido de vuelta</h2>
-            <p className="mt-3 text-sm leading-6 text-slate">Inicia sesión para revisar tarifas, validar detalles y publicar nuevas rutas.</p>
+            <p className="mt-3 text-sm leading-6 text-slate">Inicia sesión para revisar ofertas, validar detalles y publicar nuevas rutas.</p>
           </div>
           <LoginForm showDemoCredentials={showDemoCredentials} />
           <p className="mt-8 text-center text-xs text-slate">Acceso exclusivo para el equipo autorizado de UR WAY.</p>

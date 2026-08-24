@@ -67,7 +67,7 @@ export function NewsletterForm({ source = "website", inverse = false }: Newslett
           disabled={isSubmitting}
           className={`inline-flex h-14 items-center justify-center gap-2 rounded-2xl px-6 text-sm font-extrabold transition disabled:cursor-wait disabled:opacity-60 ${inverse ? "bg-white text-midnight hover:bg-sand" : "bg-midnight text-white hover:bg-midnight/90"}`}
         >
-          {isSubmitting ? "Guardando…" : "Avísame de una buena"}
+          {isSubmitting ? "Guardando…" : "Quiero recibir ofertas"}
           {!isSubmitting && <ArrowRight aria-hidden="true" className="size-4" />}
         </button>
       </div>
@@ -75,7 +75,7 @@ export function NewsletterForm({ source = "website", inverse = false }: Newslett
         {errors.email?.message ?? errors.root?.message}
         {isSubmitSuccessful && !errors.root && (
           <span className="inline-flex items-center gap-2 font-semibold text-emerald">
-            <Check aria-hidden="true" className="size-4" /> Listo. Te avisaremos cuando encontremos una ruta que valga la pena.
+            <Check aria-hidden="true" className="size-4" /> Listo. Te avisaremos cuando encontremos una oferta que valga la pena.
           </span>
         )}
       </div>

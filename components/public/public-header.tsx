@@ -9,7 +9,7 @@ import { Logo } from "@/components/ui/logo";
 function getRouteLabel(pathname: string) {
   if (pathname === "/drops") return "Rutas";
   if (pathname === "/como-funciona") return "Nuestro criterio";
-  if (pathname.startsWith("/drop/")) return "La oportunidad";
+  if (pathname.startsWith("/drop/")) return "La oferta";
   if (pathname === "/") return "Explora";
   return "UR WAY";
 }
@@ -29,7 +29,7 @@ export function PublicHeader() {
       { id: "inicio", label: "Explora" },
       { id: "drops", label: "Rutas" },
       { id: "como-funciona", label: "El criterio" },
-      { id: "newsletter", label: "Recibe avisos" },
+      { id: "newsletter", label: "Recibe ofertas" },
     ];
 
     const sectionObserver = new IntersectionObserver((entries) => {
@@ -96,13 +96,13 @@ export function PublicHeader() {
               <span className={`hidden h-5 w-px min-[390px]:block ${open ? "bg-white/20" : "bg-midnight/12"}`} />
               <span className={`mr-auto hidden max-w-24 truncate text-[9px] font-bold uppercase tracking-[0.12em] min-[390px]:block md:max-w-none md:text-[11px] md:tracking-[0.14em] ${open ? "text-white/45" : "text-slate"}`} aria-live="polite">{section}</span>
               <nav className="hidden items-center gap-1 lg:flex" aria-label="Navegación principal">
-                <Link href="/drops" onClick={closeMenu} className={`rounded-xl px-3 py-2 text-sm font-semibold transition ${open ? "text-white/60 hover:bg-white/10 hover:text-white" : "text-midnight/65 hover:bg-midnight/5 hover:text-midnight"}`}>Ver rutas</Link>
+                <Link href="/drops" onClick={closeMenu} className={`rounded-xl px-3 py-2 text-sm font-semibold transition ${open ? "text-white/60 hover:bg-white/10 hover:text-white" : "text-midnight/65 hover:bg-midnight/5 hover:text-midnight"}`}>Explorar ofertas</Link>
                 <Link href="/como-funciona" onClick={closeMenu} className={`rounded-xl px-3 py-2 text-sm font-semibold transition ${open ? "text-white/60 hover:bg-white/10 hover:text-white" : "text-midnight/65 hover:bg-midnight/5 hover:text-midnight"}`}>Nuestro criterio</Link>
               </nav>
               <Link href="/#newsletter" onClick={closeMenu} className={`hidden min-h-11 items-center gap-2 rounded-xl px-4 text-sm font-extrabold transition sm:inline-flex ${open ? "bg-coral text-midnight hover:bg-white" : "bg-midnight text-white hover:bg-coral hover:text-midnight"}`}>
-                <Bell aria-hidden="true" className="size-4" /> Recibir avisos
+                <Bell aria-hidden="true" className="size-4" /> Recibir ofertas
               </Link>
-              <Link href="/#newsletter" onClick={closeMenu} className={`inline-flex size-11 items-center justify-center rounded-xl transition sm:hidden ${open ? "bg-coral text-midnight" : "bg-midnight text-white"}`} aria-label="Recibir avisos">
+              <Link href="/#newsletter" onClick={closeMenu} className={`inline-flex size-11 items-center justify-center rounded-xl transition sm:hidden ${open ? "bg-coral text-midnight" : "bg-midnight text-white"}`} aria-label="Recibir ofertas">
                 <Bell aria-hidden="true" className="size-4" />
               </Link>
               <button type="button" onClick={() => setOpen((current) => !current)} className={`inline-flex size-11 items-center justify-center rounded-xl transition ${open ? "bg-white text-midnight hover:bg-coral" : "bg-sand text-midnight hover:bg-coral"}`} aria-expanded={open} aria-controls="island-menu" aria-label={open ? "Cerrar menú" : "Abrir menú"}>
@@ -115,13 +115,13 @@ export function PublicHeader() {
                 <div className="grid max-h-[calc(100svh-5.5rem)] gap-6 border-t border-white/12 px-4 pb-5 pt-5 sm:gap-8 sm:px-8 sm:pb-8 sm:pt-7 lg:grid-cols-[1fr_0.8fr] lg:items-end">
                   <nav className="grid gap-1" aria-label="Menú expandido">
                     <Link href="/" onClick={closeMenu} tabIndex={open ? 0 : -1} className="group flex items-center justify-between rounded-2xl px-3 py-2 font-display text-[clamp(1.65rem,8vw,3.2rem)] font-extrabold tracking-[-0.06em] text-white/60 transition hover:bg-white/5 hover:text-white">Explora <span className="text-sm text-coral transition group-hover:translate-x-1 sm:text-base">01</span></Link>
-                    <Link href="/drops" onClick={closeMenu} tabIndex={open ? 0 : -1} className="group flex items-center justify-between rounded-2xl px-3 py-2 font-display text-[clamp(1.65rem,8vw,3.2rem)] font-extrabold tracking-[-0.06em] text-white/60 transition hover:bg-white/5 hover:text-white">Ver rutas <span className="text-sm text-coral transition group-hover:translate-x-1 sm:text-base">02</span></Link>
+                    <Link href="/drops" onClick={closeMenu} tabIndex={open ? 0 : -1} className="group flex items-center justify-between rounded-2xl px-3 py-2 font-display text-[clamp(1.65rem,8vw,3.2rem)] font-extrabold tracking-[-0.06em] text-white/60 transition hover:bg-white/5 hover:text-white">Explorar ofertas <span className="text-sm text-coral transition group-hover:translate-x-1 sm:text-base">02</span></Link>
                     <Link href="/como-funciona" onClick={closeMenu} tabIndex={open ? 0 : -1} className="group flex items-center justify-between rounded-2xl px-3 py-2 font-display text-[clamp(1.65rem,8vw,3.2rem)] font-extrabold tracking-[-0.06em] text-white/60 transition hover:bg-white/5 hover:text-white">Nuestro criterio <span className="text-sm text-coral transition group-hover:translate-x-1 sm:text-base">03</span></Link>
                   </nav>
                   <div className="rounded-2xl bg-white/8 p-4 sm:p-5">
-                    <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-coral sm:text-xs">Una sola señal</p>
-                    <p className="mt-3 max-w-sm font-display text-xl font-bold leading-tight tracking-[-0.04em] sm:text-2xl">Todo lo importante en un mismo lugar: precio, ruta y contexto.</p>
-                    <Link href="/#newsletter" onClick={closeMenu} tabIndex={open ? 0 : -1} className="mt-5 inline-flex items-center gap-2 text-sm font-extrabold text-white sm:mt-6">Recibir el próximo aviso <ArrowDown aria-hidden="true" className="size-4" /></Link>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-coral sm:text-xs">La ruta completa</p>
+                    <p className="mt-3 max-w-sm font-display text-xl font-bold leading-tight tracking-[-0.04em] sm:text-2xl">Precio, fechas y contexto para decidir mejor.</p>
+                    <Link href="/#newsletter" onClick={closeMenu} tabIndex={open ? 0 : -1} className="mt-5 inline-flex items-center gap-2 text-sm font-extrabold text-white sm:mt-6">Recibir ofertas <ArrowDown aria-hidden="true" className="size-4" /></Link>
                   </div>
                 </div>
               </div>

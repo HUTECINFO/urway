@@ -64,9 +64,6 @@ export function DestinationHero({ deal, children }: DestinationHeroProps) {
 
         <div className="mt-auto grid gap-4 pb-4 sm:gap-7 sm:pb-7 lg:grid-cols-[1fr_22rem] lg:items-end">
           <div>
-            <motion.p {...entrance(0.12)} className="mb-3 flex items-center gap-2 text-[9px] font-extrabold uppercase tracking-[0.2em] text-coral sm:mb-4 sm:text-xs">
-              <span className="h-px w-8 bg-coral" /> El precio correcto cambia el viaje.
-            </motion.p>
             <div className="overflow-hidden pb-1">
               <motion.h1
                 initial={reduceMotion ? false : { y: "105%", rotate: 1.8 }}

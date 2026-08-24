@@ -335,8 +335,13 @@ textarea:focus-visible {
 }
 
 @media (max-width: 639px) {
+  html {
+    overscroll-behavior-y: none;
+  }
+
   .dynamic-shell {
     width: calc(100vw - 1rem);
+    will-change: auto;
   }
 
   .dynamic-shell.is-flight {
@@ -346,6 +351,32 @@ textarea:focus-visible {
   .dynamic-shell.is-flight .dynamic-island {
     min-height: 4rem;
     border-radius: 1.35rem;
+  }
+
+  .dynamic-island,
+  .hero-origin-card {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+
+  .dynamic-island {
+    background-color: rgba(255, 255, 255, 0.98);
+  }
+
+  .dynamic-shell.is-flight .dynamic-island,
+  .dynamic-shell.is-open .dynamic-island {
+    background-color: var(--midnight);
+  }
+
+  .hero-origin-card {
+    background-color: rgba(13, 27, 42, 0.58);
+  }
+
+  /* The catalogue can contain more than one hundred offers. Let the browser skip
+     painting cards that are outside the mobile viewport without changing the layout. */
+  .deal-card {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 32rem;
   }
 }
 

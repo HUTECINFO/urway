@@ -3,8 +3,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowDown, ArrowRight, Plane } from "lucide-react";
-import { motion, useReducedMotion, useScroll, useSpring, useTransform } from "motion/react";
+import { motion, useScroll, useSpring, useTransform } from "motion/react";
 import { useRef, type ReactNode } from "react";
+import { useMotionProfile } from "@/components/ui/use-motion-profile";
 import type { Deal } from "@/lib/domain/types";
 import { getCountryImageUrl } from "@/lib/media/country-images";
 import { formatMoney, formatShortDate } from "./deal-formatters";
@@ -19,7 +20,7 @@ const ease = [0.16, 1, 0.3, 1] as const;
 
 export function DestinationHero({ deal, children }: DestinationHeroProps) {
   const heroRef = useRef<HTMLElement>(null);
-  const reduceMotion = useReducedMotion();
+  const { reducedMotion, simplifyScrollMotion } = useMotionProfile();
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
   const progress = useSpring(scrollYProgress, { stiffness: 92, damping: 26, mass: 0.3 });
   const imageY = useTransform(progress, [0, 1], ["0%", "13%"]);
@@ -29,14 +30,14 @@ export function DestinationHero({ deal, children }: DestinationHeroProps) {
   const routePlaneX = useTransform(progress, [0, 0.55], [0, 22]);
 
   const entrance = (delay: number) => ({
-    initial: reduceMotion ? false : { opacity: 0, y: 28, filter: "blur(8px)" },
-    animate: { opacity: 1, y: 0, filter: "blur(0px)" },
-    transition: { duration: 0.82, delay, ease },
+    initial: reducedMotion ? false : simplifyScrollMotion ? { opacity: 0, y: 18 } : { opacity: 0, y: 28, filter: "blur(8px)" },
+    animate: simplifyScrollMotion ? { opacity: 1, y: 0 } : { opacity: 1, y: 0, filter: "blur(0px)" },
+    transition: { duration: simplifyScrollMotion ? 0.54 : 0.82, delay, ease },
   });
 
   return (
     <section ref={heroRef} id="inicio" className="hero-stage relative min-h-[max(52rem,100svh)] overflow-hidden bg-midnight text-white sm:min-h-[100svh]">
-      <motion.div className="absolute -inset-x-5 -inset-y-12" style={reduceMotion ? undefined : { y: imageY, scale: imageScale }}>
+      <motion.div className="absolute -inset-x-5 -inset-y-12" style={simplifyScrollMotion ? undefined : { y: imageY, scale: imageScale }}>
         <Image
           src={deal?.imageUrl ?? getCountryImageUrl("MX")}
           alt={deal ? `Vista de ${deal.destination.city}, ${deal.destination.country}` : "Vista aérea desde la ventana de un avión"}
@@ -49,11 +50,11 @@ export function DestinationHero({ deal, children }: DestinationHeroProps) {
       </motion.div>
       <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(8,19,31,.24)_0%,rgba(8,19,31,.12)_25%,rgba(8,19,31,.6)_57%,rgba(8,19,31,.97)_100%)]" />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_82%_22%,rgba(255,122,89,.3),transparent_28%),radial-gradient(circle_at_18%_45%,rgba(82,182,255,.16),transparent_32%)]" />
-      <div aria-hidden="true" className="hero-grain absolute inset-0 opacity-40" />
+      <div aria-hidden="true" className={`hero-grain absolute inset-0 ${simplifyScrollMotion ? "opacity-20" : "opacity-40"}`} />
 
       <motion.div
         className="container-page relative flex min-h-[max(52rem,100svh)] flex-col pb-5 pt-24 sm:min-h-[100svh] sm:pb-8 sm:pt-32 lg:pb-10"
-        style={reduceMotion ? undefined : { y: contentY, opacity: contentOpacity }}
+        style={simplifyScrollMotion ? undefined : { y: contentY, opacity: contentOpacity }}
       >
         <motion.div {...entrance(0.05)} className="flex items-center justify-between gap-3 pt-1 sm:pt-3">
           <p className="inline-flex items-center gap-2 rounded-full border border-white/18 bg-midnight/24 px-3 py-2 text-[9px] font-extrabold uppercase tracking-[0.16em] backdrop-blur-xl sm:text-[10px]">
@@ -66,7 +67,7 @@ export function DestinationHero({ deal, children }: DestinationHeroProps) {
           <div>
             <div className="overflow-hidden pb-1">
               <motion.h1
-                initial={reduceMotion ? false : { y: "105%", rotate: 1.8 }}
+                initial={reducedMotion ? false : { y: "105%", rotate: 1.8 }}
                 animate={{ y: 0, rotate: 0 }}
                 transition={{ duration: 1, delay: 0.16, ease }}
                 className="max-w-5xl text-pretty font-display text-[clamp(3.25rem,15.6vw,9.7rem)] font-extrabold leading-[0.83] tracking-[-0.078em] sm:leading-[0.78] sm:tracking-[-0.085em]"
@@ -104,7 +105,7 @@ export function DestinationHero({ deal, children }: DestinationHeroProps) {
                 <div className="mt-4 grid grid-cols-[auto_1fr_auto] items-center gap-3 sm:mt-5 sm:gap-5">
                   <div><strong className="font-display text-3xl font-extrabold tracking-[-0.06em] sm:text-4xl">{deal.origin.code}</strong><p className="text-[9px] font-bold uppercase tracking-[0.13em] text-slate">Origen</p></div>
                   <div className="hero-route-line relative h-px bg-midnight/18">
-                    <motion.span aria-hidden="true" className="absolute -top-3 left-[38%] flex size-6 items-center justify-center rounded-full bg-midnight text-coral shadow-lg" style={reduceMotion ? undefined : { x: routePlaneX }}><Plane className="size-3.5 rotate-90" /></motion.span>
+                    <motion.span aria-hidden="true" className="absolute -top-3 left-[38%] flex size-6 items-center justify-center rounded-full bg-midnight text-coral shadow-lg" style={simplifyScrollMotion ? undefined : { x: routePlaneX }}><Plane className="size-3.5 rotate-90" /></motion.span>
                   </div>
                   <div className="text-right"><strong className="font-display text-3xl font-extrabold tracking-[-0.06em] sm:text-4xl">{deal.destination.code}</strong><p className="text-[9px] font-bold uppercase tracking-[0.13em] text-slate">Destino</p></div>
                 </div>

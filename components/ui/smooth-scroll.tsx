@@ -1,17 +1,18 @@
 "use client";
 
 import { ReactLenis } from "lenis/react";
-import { useReducedMotion } from "motion/react";
 import type { ReactNode } from "react";
+import { useMotionProfile } from "./use-motion-profile";
 
 interface SmoothScrollProps {
   children: ReactNode;
 }
 
 export function SmoothScroll({ children }: SmoothScrollProps) {
-  const reduceMotion = useReducedMotion();
+  const { simplifyScrollMotion } = useMotionProfile();
 
-  if (reduceMotion) return children;
+  // Native touch scrolling stays on the browser compositor. Lenis remains a desktop polish.
+  if (simplifyScrollMotion) return children;
 
   return (
     <ReactLenis
@@ -22,9 +23,6 @@ export function SmoothScroll({ children }: SmoothScrollProps) {
         duration: 0.82,
         lerp: 0.14,
         smoothWheel: true,
-        syncTouch: true,
-        touchInertiaExponent: 1.65,
-        touchMultiplier: 1,
         wheelMultiplier: 0.9,
       }}
     >

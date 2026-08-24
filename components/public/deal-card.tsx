@@ -15,7 +15,7 @@ interface DealCardProps {
 
 export function DealCard({ deal, priority = false }: DealCardProps) {
   return (
-    <article className="group flex h-full flex-col overflow-hidden rounded-[1.75rem] border border-midnight/8 bg-white card-shadow">
+    <article className="deal-card group flex h-full flex-col overflow-hidden rounded-[1.75rem] border border-midnight/8 bg-white card-shadow">
       <Link href={`/drop/${deal.slug}`} className="relative block aspect-[4/3] overflow-hidden bg-sand" aria-label={`Ver detalles de ${deal.title}`}>
         <Image
           src={deal.imageUrl}

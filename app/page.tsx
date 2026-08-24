@@ -49,7 +49,7 @@ export default async function Home({ searchParams }: HomeProps) {
             <Reveal>
               <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-coral">La promesa</p>
               <p className="mt-5 max-w-6xl text-balance font-display text-[clamp(2.45rem,10vw,7.2rem)] font-extrabold leading-[0.94] tracking-[-0.06em] text-midnight sm:mt-6 sm:leading-[0.88] sm:tracking-[-0.075em]">
-                No necesitas más pestañas. Necesitas una oferta que te dé ganas de hacer <span className="text-coral">la maleta.</span>
+                Encuentra la oferta.<br />Reserva <span className="text-coral">el viaje.</span>
               </p>
             </Reveal>
             <Reveal delay={0.08} distance={28} className="mt-9 grid gap-5 border-t border-midnight/12 pt-7 text-[15px] leading-6 text-slate sm:mt-12 sm:gap-6 sm:pt-8 sm:text-base sm:leading-7 md:grid-cols-3">

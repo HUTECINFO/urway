@@ -51,7 +51,8 @@ const environmentToken = () => process.env.TRAVELPAYOUTS_API_TOKEN?.trim()
   || process.env.TRAVELPAYOUTS_TOKEN?.trim();
 
 const environmentMarker = () => process.env.TRAVELPAYOUTS_MARKER?.trim()
-  || process.env.TRAVELPAYOUTS_PARTNER_ID?.trim();
+  || process.env.TRAVELPAYOUTS_PARTNER_ID?.trim()
+  || "768547";
 
 const datePart = (value: string): string => value.slice(0, 10);
 
@@ -60,11 +61,11 @@ const asIsoDate = (value: string | undefined, fallback: string): string => {
   return Number.isNaN(candidate.getTime()) ? new Date(fallback).toISOString() : candidate.toISOString();
 };
 
-const safeAirport = (code: string, fallback: Airport): Airport => {
+const safeAirport = (code: string, fallback?: Airport): Airport | null => {
   try {
     return getAirport(code);
   } catch {
-    return fallback;
+    return fallback ?? null;
   }
 };
 
@@ -136,23 +137,23 @@ export class TravelpayoutsProvider implements FlightDealProvider {
 
   private async fetchRouteOffers(
     originCode: string,
-    destinationCode: string,
+    destinationCode: string | undefined,
     params: DealSearchParams,
   ): Promise<TravelpayoutsOffer[]> {
     if (!this.token) return [];
     const query = new URLSearchParams({
       origin: originCode,
-      destination: destinationCode,
       departure_at: params.departureDateFrom.slice(0, 7),
       currency: (params.currency ?? "MXN").toLowerCase(),
       unique: "false",
       sorting: "price",
       direct: "false",
       show_to_affiliates: "true",
-      limit: "30",
+      limit: destinationCode ? "30" : "100",
       page: "1",
       one_way: String(params.tripType === TripType.ONE_WAY),
     });
+    if (destinationCode) query.set("destination", destinationCode);
     if (params.tripType === TripType.ROUND_TRIP && params.returnDateFrom) {
       query.set("return_at", params.returnDateFrom.slice(0, 7));
     }
@@ -167,11 +168,11 @@ export class TravelpayoutsProvider implements FlightDealProvider {
 
   async fetchDeals(params: DealSearchParams): Promise<readonly NormalizedFlightDeal[]> {
     if (!this.isActive || !this.token) return [];
-    if (!params.destinations?.length) return [];
-
-    const routes = params.origins.flatMap((origin) =>
-      params.destinations!.map((destination) => ({ origin, destination })),
-    );
+    const routes = params.destinations?.length
+      ? params.origins.flatMap((origin) =>
+          params.destinations!.map((destination) => ({ origin, destination })),
+        )
+      : params.origins.map((origin) => ({ origin, destination: undefined }));
     const settled = await Promise.allSettled(
       routes.map(({ origin, destination }) => this.fetchRouteOffers(origin, destination, params)),
     );
@@ -186,9 +187,13 @@ export class TravelpayoutsProvider implements FlightDealProvider {
       if (result.status !== "fulfilled") return;
       const route = routes[index];
       const origin = safeAirport(route.origin, getAirport("MEX"));
-      const destination = safeAirport(route.destination, getAirport(route.destination));
+      if (!origin) return;
       result.value.forEach((offer, offerIndex) => {
         if (!Number.isFinite(offer.price) || !offer.link) return;
+        const destinationCode = offer.destination?.trim().toUpperCase() || route.destination;
+        if (!destinationCode) return;
+        const destination = safeAirport(destinationCode);
+        if (!destination || destination.countryCode === "MX") return;
         const departureDate = asIsoDate(offer.departure_at, params.departureDateFrom);
         const returnDate = params.tripType === TripType.ONE_WAY
           ? undefined
@@ -196,6 +201,7 @@ export class TravelpayoutsProvider implements FlightDealProvider {
         const departureTime = new Date(departureDate).getTime();
         const returnTime = returnDate ? new Date(returnDate).getTime() : undefined;
         if (departureTime < departureFrom || departureTime > departureTo) return;
+        if (params.tripType === TripType.ROUND_TRIP && (!returnTime || returnTime <= departureTime)) return;
         if (returnFrom !== undefined && returnTime !== undefined && returnTime < returnFrom) return;
         if (returnTo !== undefined && returnTime !== undefined && returnTime > returnTo) return;
         if (params.maxPrice !== undefined && (offer.price as number) > params.maxPrice) return;
@@ -203,7 +209,7 @@ export class TravelpayoutsProvider implements FlightDealProvider {
         if (!url) return;
         deals.push({
           provider: this.id,
-          providerDealId: `tp-${route.origin}-${route.destination}-${datePart(departureDate)}-${Math.round(offer.price as number)}-${offerIndex}`.slice(0, 255),
+          providerDealId: `tp-${route.origin}-${destinationCode}-${datePart(departureDate)}-${Math.round(offer.price as number)}-${offerIndex}`.slice(0, 255),
           origin,
           destination,
           departureDate,

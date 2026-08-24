@@ -30,10 +30,13 @@ export default async function Home({ searchParams }: HomeProps) {
   const requestedOrigin = typeof query.origen === "string" ? query.origen.toUpperCase() : "";
   const selectedOrigin = mexicoAirports.some((airport) => airport.code === requestedOrigin) ? requestedOrigin : "";
   const deals = await listPublishedDeals(selectedOrigin || undefined);
-  const featuredDeal = deals.find((deal) => deal.featured) ?? deals[0];
-  const spotlightDeals = deals.slice(0, 3);
+  const rankedDeals = [...deals].sort((left, right) =>
+    left.price - right.price || right.score.total - left.score.total,
+  );
+  const featuredDeal = rankedDeals[0];
+  const spotlightDeals = rankedDeals.slice(0, 3);
   const spotlightIds = new Set(spotlightDeals.map((deal) => deal.id));
-  const secondaryDeals = deals.filter((deal) => !spotlightIds.has(deal.id)).slice(0, 3);
+  const secondaryDeals = rankedDeals.filter((deal) => !spotlightIds.has(deal.id)).slice(0, 3);
   const selectedAirport = mexicoAirports.find((airport) => airport.code === selectedOrigin);
 
   return (

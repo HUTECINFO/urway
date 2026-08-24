@@ -39,7 +39,10 @@ export default async function DropsPage({ searchParams }: DropsPageProps) {
   const selectedOrigin = mexicoAirports.some((airport) => airport.code === requestedOrigin) ? requestedOrigin : "";
   const requestedType = typeof query.tipo === "string" ? query.tipo.toUpperCase() : "";
   const selectedType = dealTypes.includes(requestedType as DealType) ? requestedType as DealType : undefined;
-  const allDeals = await listPublishedDeals(selectedOrigin || undefined);
+  const allDeals = (await listPublishedDeals(selectedOrigin || undefined)).sort((left, right) =>
+    new Date(left.travelStartDate).getTime() - new Date(right.travelStartDate).getTime()
+      || left.price - right.price,
+  );
   const deals = selectedType ? allDeals.filter((deal) => deal.dealType === selectedType) : allDeals;
   const selectedAirport = mexicoAirports.find((airport) => airport.code === selectedOrigin);
 

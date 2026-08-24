@@ -521,6 +521,7 @@ export async function saveDiscoveredDeals(deals: readonly Deal[]) {
     status: deal.status,
     detected_at: deal.detectedAt,
     verified_at: deal.verifiedAt,
+    published_at: deal.publishedAt ?? null,
     expires_at: deal.expiresAt,
     fingerprint: deal.fingerprint,
     origin_airport_id: null as string | null,
@@ -536,10 +537,54 @@ export async function saveDiscoveredDeals(deals: readonly Deal[]) {
   if (rows.some((row) => !row.origin_airport_id)) throw new Error("Falta un aeropuerto de origen en Supabase");
   const { data, error } = await client
     .from("deals")
-    .upsert(rows, { onConflict: "provider,provider_reference", ignoreDuplicates: true })
+    .upsert(rows, { onConflict: "provider,provider_reference", ignoreDuplicates: false })
     .select("id");
   if (error) throw new Error(`No se pudieron guardar candidatos: ${error.message}`);
   return data?.length ?? 0;
+}
+
+export async function replacePublishedDeals(deals: readonly Deal[]) {
+  if (deals.length === 0) {
+    throw new Error("No se reemplazará el catálogo con una consulta vacía");
+  }
+
+  const saved = await saveDiscoveredDeals(deals);
+  const activeKeys = new Set(deals.map((deal) => `${deal.provider}:${deal.providerDealId}`));
+  const client = await dbClient(true);
+
+  if (!client) {
+    let expired = 0;
+    const store = getDemoStore();
+    for (const [id, deal] of store.deals) {
+      if (deal.status !== DealStatus.PUBLISHED || activeKeys.has(`${deal.provider}:${deal.providerDealId}`)) continue;
+      const timestamp = new Date().toISOString();
+      store.deals.set(id, { ...deal, status: DealStatus.EXPIRED, expiresAt: timestamp, updatedAt: timestamp });
+      expired += 1;
+    }
+    return { saved, expired };
+  }
+
+  const { data: published, error: listError } = await client
+    .from("deals")
+    .select("id,provider,provider_reference")
+    .eq("status", DealStatus.PUBLISHED);
+  if (listError) throw new Error(`No se pudo revisar el catálogo publicado: ${listError.message}`);
+
+  const obsoleteIds = (published ?? [])
+    .filter((deal) => !activeKeys.has(`${deal.provider as string}:${deal.provider_reference as string}`))
+    .map((deal) => deal.id as string);
+  const timestamp = new Date().toISOString();
+
+  for (let index = 0; index < obsoleteIds.length; index += 100) {
+    const batch = obsoleteIds.slice(index, index + 100);
+    const { error } = await client
+      .from("deals")
+      .update({ status: DealStatus.EXPIRED, expires_at: timestamp, updated_at: timestamp })
+      .in("id", batch);
+    if (error) throw new Error(`No se pudieron retirar ofertas antiguas: ${error.message}`);
+  }
+
+  return { saved, expired: obsoleteIds.length };
 }
 
 export async function verifyActiveDeals() {
